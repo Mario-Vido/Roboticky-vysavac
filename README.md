@@ -1,4 +1,0 @@
-"# RMR" 
-
-
-Ado je teply
