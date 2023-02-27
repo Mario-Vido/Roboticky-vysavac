@@ -22,7 +22,9 @@ Robot::~Robot()
     ready_promise.set_value();
     robotthreadHandle.join();
     laserthreadHandle.join();
+    #ifdef useCamera
     camerathreadhandle.join();
+#endif
 #ifdef _WIN32
 WSACleanup();
 #endif
@@ -236,15 +238,17 @@ void Robot::robotStart()
         std::function<void(void)> f2 =std::bind(&Robot::laserprocess, this);
         laserthreadHandle=std::move(std::thread(f2));
     }
+    #ifdef useCamera
     if(wasCameraSet==1)
     {
         std::function<void(void)> f3 =std::bind(&Robot::imageViewer, this);
         camerathreadhandle=std::move(std::thread(f3));
     }
+#endif
 
 }
 
-
+#ifdef useCamera
 void Robot::imageViewer()
 {
     cv::VideoCapture cap;
@@ -260,7 +264,6 @@ void Robot::imageViewer()
 
 
 
-        std::cout<<"doslo toto "<<frameBuf.rows<<" "<<frameBuf.cols<<std::endl;
 
 
       // tu sa vola callback..
@@ -274,3 +277,4 @@ void Robot::imageViewer()
     }
     cap.release();
 }
+#endif

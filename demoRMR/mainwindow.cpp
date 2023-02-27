@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 
     //tu je napevno nastavena ip. treba zmenit na to co ste si zadali do text boxu alebo nejaku inu pevnu. co bude spravna
-    ipaddress="127.0.0.1";//192.168.1.11toto je na niektory realny robot.. na lokal budete davat "127.0.0.1"
+    ipaddress="127.0.0.1"; //192.168.1.11 127.0.0.1
   //  cap.open("http://192.168.1.11:8000/stream.mjpg");
     ui->setupUi(this);
     datacounter=0;
@@ -57,8 +57,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
     if(useCamera1==true && actIndex>-1)/// ak zobrazujem data z kamery a aspon niektory frame vo vectore je naplneny
     {
         std::cout<<actIndex<<std::endl;
-        QImage image = QImage((uchar*)frame[actIndex].data, frame[actIndex].cols, frame[actIndex].rows, frame[actIndex].step, QImage::Format_RGB888  );//kopirovanie cvmat do qimage
-        painter.drawImage(rect,image.rgbSwapped());
+
     }
     else
     {
@@ -100,7 +99,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     ///tu mozete robit s datami z robota
     /// ale nic vypoctovo narocne - to iste vlakno ktore cita data z robota
     ///teraz tu posielam rychlosti na zaklade toho co setne joystick a vypisujeme data z robota(kazdy 5ty krat. ale mozete skusit aj castejsie). vyratajte si polohu. a vypiste spravnu
-    /// tuto joystick cast mozete vklude vymazat,alebo znasilnit na vas regulator alebo ake mate pohnutky... kazdopadne, aktualne to blokuje gombiky cize tak
+    /// tuto joystick cast mozete vklude vymazat,alebo znasilnit na vas regulator alebo ake mate pohnutky
     if(forwardspeed==0 && rotationspeed!=0)
         robot.setRotationSpeed(rotationspeed);
     else if(forwardspeed!=0 && rotationspeed==0)
@@ -152,16 +151,7 @@ int MainWindow::processThisLidar(LaserMeasurement laserData)
 
 }
 
-///toto je calback na data z kamery, ktory ste podhodili robotu vo funkcii on_pushButton_9_clicked
-/// vola sa ked dojdu nove data z kamery
-int MainWindow::processThisCamera(cv::Mat cameraData)
-{
 
-    cameraData.copyTo(frame[(actIndex+1)%3]);//kopirujem do nasej strukury
-    actIndex=(actIndex+1)%3;//aktualizujem kde je nova fotka
-    updateLaserPicture=1;
-    return 0;
-}
 void MainWindow::on_pushButton_9_clicked() //start button
 {
 
@@ -174,25 +164,11 @@ void MainWindow::on_pushButton_9_clicked() //start button
     /// lambdy su super, setria miesto a ak su rozumnej dlzky,tak aj prehladnost... ak ste o nich nic nepoculi poradte sa s vasim doktorom alebo lekarnikom...
     robot.setLaserParameters(ipaddress,52999,5299,/*[](LaserMeasurement dat)->int{std::cout<<"som z lambdy callback"<<std::endl;return 0;}*/std::bind(&MainWindow::processThisLidar,this,std::placeholders::_1));
     robot.setRobotParameters(ipaddress,53000,5300,std::bind(&MainWindow::processThisRobot,this,std::placeholders::_1));
-    //---simulator ma port 8889, realny robot 8000
-    robot.setCameraParameters("http://"+ipaddress+":8889/stream.mjpg",std::bind(&MainWindow::processThisCamera,this,std::placeholders::_1));
 
     ///ked je vsetko nasetovane tak to tento prikaz spusti (ak nieco nieje setnute,tak to normalne nenastavi.cize ak napr nechcete kameru,vklude vsetky info o nej vymazte)
     robot.robotStart();
 
 
-
-    //ziskanie joystickov
-    instance = QJoysticks::getInstance();
-
-
-    /// prepojenie joysticku s jeho callbackom... zas cez lambdu. neviem ci som to niekde spominal,ale lambdy su super. okrem toho mam este rad ternarne operatory a spolocneske hry ale to tiez nikoho nezaujima
-    /// co vas vlastne zaujima? citanie komentov asi nie, inak by ste citali toto a ze tu je blbosti
-    connect(
-        instance, &QJoysticks::axisChanged,
-        [this]( const int js, const int axis, const qreal value) { if(/*js==0 &&*/ axis==1){forwardspeed=-value*300;}
-            if(/*js==0 &&*/ axis==0){rotationspeed=-value*(3.14159/2.0);}}
-    );
 }
 
 void MainWindow::on_pushButton_2_clicked() //forward
