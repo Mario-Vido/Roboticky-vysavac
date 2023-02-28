@@ -24,13 +24,17 @@ const double tick_meter = 0.000085292090497737556558;
 
 typedef struct
 {
-    double encoder_Left_prev;
-    double encoder_Right_prev;
+    short encoder_Left_prev;
+    short encoder_Right_prev;
     double encoder_Angle_prev;
 
-    double encoder_Left;
-    double encoder_Right;
+    short encoder_Left;
+    short encoder_Right;
     double encoder_Angle;
+
+    double diff_Left;
+    double diff_Right;
+    bool stop;
 }Data;
 
 typedef struct
