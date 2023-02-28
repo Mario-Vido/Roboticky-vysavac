@@ -14,6 +14,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
+
 {
 
     //tu je napevno nastavena ip. treba zmenit na to co ste si zadali do text boxu alebo nejaku inu pevnu. co bude spravna
@@ -90,24 +91,45 @@ void  MainWindow::setUiValues(double robotX,double robotY,double robotFi)
      ui->lineEdit_4->setText(QString::number(robotFi));
 }
 
-///toto je calback na data z robota, ktory ste podhodili robotu vo funkcii on_pushButton_9_clicked
-/// vola sa vzdy ked dojdu nove data z robota. nemusite nic riesit, proste sa to stane
+Data dataSave; //ukladame data
+Location location;
+
+void MainWindow::initData()
+{
+    dataSave.encoder_Left_prev = robotdata.EncoderLeft;
+    dataSave.encoder_Right_prev = robotdata.EncoderRight;
+    dataSave.encoder_Angle_prev = robotdata.GyroAngle/100.0;
+}
+
+
 int MainWindow::processThisRobot(TKobukiData robotdata)
 {
+    dataSave.encoder_Left = robotdata.EncoderLeft;
+    dataSave.encoder_Right = robotdata.EncoderRight;
+    dataSave.encoder_Angle = robotdata.GyroAngle/100.0 - dataSave.encoder_Angle_prev;
 
+    location.speed_Left_w = tick_meter * (dataSave.encoder_Left - dataSave.encoder_Left_prev);
+    location.speed_Right_w = tick_meter * (dataSave.encoder_Right - dataSave.encoder_Right_prev);
+    location.speed = (location.speed_Left_w + location.speed_Right_w)/2;
+
+    dataSave.encoder_Left_prev = location.speed_Left_w;
+    dataSave.encoder_Right_prev = location.speed_Right_w;
+
+    location.act_posX = location.act_posX + (location.speed * cos(dataSave.encoder_Angle*PI/180.0));
+    location.act_posY = location.act_posY + (location.speed * sin(dataSave.encoder_Angle*PI/180.0));
 
     ///tu mozete robit s datami z robota
     /// ale nic vypoctovo narocne - to iste vlakno ktore cita data z robota
     ///teraz tu posielam rychlosti na zaklade toho co setne joystick a vypisujeme data z robota(kazdy 5ty krat. ale mozete skusit aj castejsie). vyratajte si polohu. a vypiste spravnu
     /// tuto joystick cast mozete vklude vymazat,alebo znasilnit na vas regulator alebo ake mate pohnutky
-    if(forwardspeed==0 && rotationspeed!=0)
-        robot.setRotationSpeed(rotationspeed);
-    else if(forwardspeed!=0 && rotationspeed==0)
-        robot.setTranslationSpeed(forwardspeed);
-    else if((forwardspeed!=0 && rotationspeed!=0))
-        robot.setArcSpeed(forwardspeed,forwardspeed/rotationspeed);
-    else
-        robot.setTranslationSpeed(0);
+//    if(forwardspeed==0 && rotationspeed!=0)
+//        robot.setRotationSpeed(rotationspeed);
+//    else if(forwardspeed!=0 && rotationspeed==0)
+//        robot.setTranslationSpeed(forwardspeed);
+//    else if((forwardspeed!=0 && rotationspeed!=0))
+//        robot.setArcSpeed(forwardspeed,forwardspeed/rotationspeed);
+//    else
+//        robot.setTranslationSpeed(0);
 
 ///TU PISTE KOD... TOTO JE TO MIESTO KED NEVIETE KDE ZACAT,TAK JE TO NAOZAJ TU. AK AJ TAK NEVIETE, SPYTAJTE SA CVICIACEHO MA TU NATO STRING KTORY DA DO HLADANIA XXX
 
@@ -122,7 +144,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
                 /// okno pocuva vo svojom slote a vasu premennu nastavi tak ako chcete. prikaz emit to presne takto spravi
                 /// viac o signal slotoch tu: https://doc.qt.io/qt-5/signalsandslots.html
         ///posielame sem nezmysli.. pohrajte sa nech sem idu zmysluplne veci
-        emit uiValuesChanged(robotdata.EncoderLeft,11,12);
+        emit uiValuesChanged(location.act_posX, location.act_posY, location.act_agl);
         ///toto neodporucam na nejake komplikovane struktury.signal slot robi kopiu dat. radsej vtedy posielajte
         /// prazdny signal a slot bude vykreslovat strukturu (vtedy ju musite mat samozrejme ako member premmennu v mainwindow.ak u niekoho najdem globalnu premennu,tak bude cistit bludisko zubnou kefkou.. kefku dodam)
         /// vtedy ale odporucam pouzit mutex, aby sa vam nestalo ze budete pocas vypisovania prepisovat niekde inde
@@ -174,6 +196,7 @@ void MainWindow::on_pushButton_9_clicked() //start button
 void MainWindow::on_pushButton_2_clicked() //forward
 {
     //pohyb dopredu
+
     robot.setTranslationSpeed(500);
 
 }

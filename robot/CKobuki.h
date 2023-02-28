@@ -164,7 +164,10 @@ private:
     long double b = 0.23; // wheelbase distance in meters, from kobuki manual https://yujinrobot.github.io/kobuki/doxygen/enAppendixProtocolSpecification.html
 //
 
-
+public:
+    long double getTickToMeter(){
+        return tickToMeter;
+    }
 };
 
 #endif

@@ -20,6 +20,29 @@
 
 #include "robot.h"
 
+const double tick_meter = 0.000085292090497737556558;
+
+typedef struct
+{
+    double encoder_Left_prev;
+    double encoder_Right_prev;
+    double encoder_Angle_prev;
+
+    double encoder_Left;
+    double encoder_Right;
+    double encoder_Angle;
+}Data;
+
+typedef struct
+{
+    double speed_Left_w;
+    double speed_Right_w;
+    double speed;
+
+    double act_posX             = 0;
+    double act_posY             = 0;
+    double act_agl              = 0;
+}Location;
 
 namespace Ui {
 class MainWindow;
@@ -45,6 +68,7 @@ public:
 
     int processThisRobot(TKobukiData robotdata);
 
+    void initData();
 
 
 private slots:
