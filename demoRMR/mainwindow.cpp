@@ -104,12 +104,15 @@ void MainWindow::initData()
 
 int MainWindow::processThisRobot(TKobukiData robotdata)
 {
+    while (dataSave.stop==true){
     dataSave.encoder_Left = robotdata.EncoderLeft;
     dataSave.encoder_Right = robotdata.EncoderRight;
     dataSave.encoder_Angle = robotdata.GyroAngle/100.0 - dataSave.encoder_Angle_prev;
 
-    location.speed_Left_w = tick_meter * (dataSave.encoder_Left - dataSave.encoder_Left_prev);
-    location.speed_Right_w = tick_meter * (dataSave.encoder_Right - dataSave.encoder_Right_prev);
+    dataSave.diff_Left = dataSave.encoder_Left - dataSave.encoder_Left_prev;
+    location.speed_Left_w = tick_meter * (dataSave.diff_Left);
+    dataSave.diff_Right = dataSave.encoder_Right - dataSave.encoder_Right_prev;
+    location.speed_Right_w = tick_meter * (dataSave.diff_Right);
     location.speed = (location.speed_Left_w + location.speed_Right_w)/2;
 
     dataSave.encoder_Left_prev = location.speed_Left_w;
@@ -153,7 +156,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     datacounter++;
 
     return 0;
-
+    }
 }
 
 ///toto je calback na data z lidaru, ktory ste podhodili robotu vo funkcii on_pushButton_9_clicked
@@ -196,31 +199,35 @@ void MainWindow::on_pushButton_9_clicked() //start button
 void MainWindow::on_pushButton_2_clicked() //forward
 {
     //pohyb dopredu
-
+    dataSave.stop = true;
     robot.setTranslationSpeed(500);
 
 }
 
 void MainWindow::on_pushButton_3_clicked() //back
 {
+    dataSave.stop = true;
     robot.setTranslationSpeed(-250);
 
 }
 
 void MainWindow::on_pushButton_6_clicked() //left
 {
+    dataSave.stop = true;
 robot.setRotationSpeed(3.14159/2);
 
 }
 
 void MainWindow::on_pushButton_5_clicked()//right
 {
+    dataSave.stop = true;
 robot.setRotationSpeed(-3.14159/2);
 
 }
 
 void MainWindow::on_pushButton_4_clicked() //stop
 {
+    dataSave.stop = false;
     robot.setTranslationSpeed(0);
 
 }
