@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QPainter>
 #include <math.h>
-///Adko a Majko
+///Adko a Majko2
 
 
 MainWindow::MainWindow(QWidget *parent) :
