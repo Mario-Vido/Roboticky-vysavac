@@ -2,7 +2,10 @@
 #include "ui_mainwindow.h"
 #include <QPainter>
 #include <math.h>
-///Adko a Majko2
+///Adko a Majko2 a Matko
+
+const double koncovyX = -0.2;
+const double koncovyY = 3;
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -87,11 +90,17 @@ void  MainWindow::setUiValues(double robotX,double robotY,double robotFi)
 Data dataSave; //ukladame data
 Location location;
 
+/////////////////////////
+double calculateAngle(double x1, double y1, double x2, double y2) {
+
+    double angle = atan2(y2 - y1, x2 - x1);
+    angle = angle * 180.0 / 3.14159265358979323846;
+    return angle;
+}
+///////////////////////
 
 int MainWindow::processThisRobot(TKobukiData robotdata)
 {
-    if(dataSave.stop==true)
-    {
     if(dataSave.init==true) // inicializujeme data
     {
         dataSave.encoder_Left_prev = robotdata.EncoderLeft;
@@ -154,8 +163,27 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     }
     datacounter++;
 
+ ///////////////zacinap pid//////////////////////
 
+    printf("moj uhol %f\n",dataSave.encoder_Angle);
+    double ciselko;
+    ciselko = calculateAngle(location.act_posX, location.act_posY, koncovyX, koncovyY);
+    printf("pozadovany uhol %f\n",ciselko);
+
+    if ((dataSave.encoder_Angle < ciselko + 5) && (dataSave.encoder_Angle > ciselko - 5)) {
+        printf("som v zone\n");
+        robot.setTranslationSpeed(500);
     }
+
+    if ((dataSave.encoder_Angle > ciselko + 5) || (dataSave.encoder_Angle < ciselko - 5)) {
+        printf("som mimo zony\n");
+        robot.setRotationSpeed(1);
+    }
+
+ //////////////koncim pid////////////////////////
+
+
+
     return 0;
 }
 
