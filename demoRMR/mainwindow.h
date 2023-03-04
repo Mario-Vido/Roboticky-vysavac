@@ -44,9 +44,9 @@ typedef struct
 
 typedef struct
 {
-    double speed_Left_w;
-    double speed_Right_w;
-    double speed;
+    double distance_Left_w;
+    double distance_Right_w;
+    double distance;
 
     double act_posX             = 0.0;
     double act_posY             = 0.0;
