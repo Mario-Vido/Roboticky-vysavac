@@ -21,20 +21,25 @@
 #include "robot.h"
 
 const double tick_meter = 0.000085292090497737556558;
+const double b = 0.23;
+
+
 
 typedef struct
 {
-    short encoder_Left_prev;
-    short encoder_Right_prev;
+    bool init = true;
+    double encoder_Left_prev;
+    double encoder_Right_prev;
     double encoder_Angle_prev;
 
-    short encoder_Left;
-    short encoder_Right;
+    double encoder_Left;
+    double encoder_Right;
     double encoder_Angle;
 
     double diff_Left;
     double diff_Right;
     bool stop;
+
 }Data;
 
 typedef struct
@@ -43,9 +48,9 @@ typedef struct
     double speed_Right_w;
     double speed;
 
-    double act_posX             = 0;
-    double act_posY             = 0;
-    double act_agl              = 0;
+    double act_posX             = 0.0;
+    double act_posY             = 0.0;
+    double act_agl              = 0.0;
 }Location;
 
 namespace Ui {
@@ -74,6 +79,9 @@ public:
 
     void initData();
 
+    void getData();
+
+    void getPosition();
 
 private slots:
     void on_pushButton_9_clicked();

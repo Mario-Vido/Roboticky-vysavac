@@ -23,7 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-
     datacounter=0;
 
 
@@ -88,77 +87,81 @@ void  MainWindow::setUiValues(double robotX,double robotY,double robotFi)
 Data dataSave; //ukladame data
 Location location;
 
-void MainWindow::initData()
-{
-    dataSave.encoder_Left_prev = robotdata.EncoderLeft;
-    dataSave.encoder_Right_prev = robotdata.EncoderRight;
-    dataSave.encoder_Angle_prev = robotdata.GyroAngle/100.0;
-}
-
 
 int MainWindow::processThisRobot(TKobukiData robotdata)
 {
-    while (dataSave.stop==true){
+    if(dataSave.stop==true)
+    {
+    if(dataSave.init==true)
+    {
+        dataSave.encoder_Left_prev = robotdata.EncoderLeft;
+        dataSave.encoder_Right_prev = robotdata.EncoderRight;
+        dataSave.encoder_Angle_prev = robotdata.GyroAngle/100.0;
+
+        dataSave.init = false;
+    }
+
     dataSave.encoder_Left = robotdata.EncoderLeft;
     dataSave.encoder_Right = robotdata.EncoderRight;
-    dataSave.encoder_Angle = robotdata.GyroAngle/100.0 - dataSave.encoder_Angle_prev;
 
-    dataSave.diff_Left = dataSave.encoder_Left - dataSave.encoder_Left_prev;
-    location.speed_Left_w = tick_meter * (dataSave.diff_Left);
-    dataSave.diff_Right = dataSave.encoder_Right - dataSave.encoder_Right_prev;
-    location.speed_Right_w = tick_meter * (dataSave.diff_Right);
+    if(dataSave.encoder_Left_prev - dataSave.encoder_Left > 60000)
+    {
+        dataSave.encoder_Left_prev = -(65535 - dataSave.encoder_Left_prev);
+    }
+    else if(dataSave.encoder_Left_prev - dataSave.encoder_Left > -60000)
+    {
+         dataSave.encoder_Left_prev = 65535 + dataSave.encoder_Left_prev;
+    }
+    if(dataSave.encoder_Right_prev - dataSave.encoder_Right > 60000)
+    {
+        dataSave.encoder_Right_prev = -(65535 - dataSave.encoder_Right_prev);
+    }
+    else if(dataSave.encoder_Right_prev - dataSave.encoder_Right > -60000)
+    {
+         dataSave.encoder_Right_prev = 65535 + dataSave.encoder_Right_prev;
+    }
+
+    dataSave.encoder_Angle = robotdata.GyroAngle/100.0 - dataSave.encoder_Angle_prev;
+    if(dataSave.encoder_Angle >180.0)
+    {
+        dataSave.encoder_Angle = dataSave.encoder_Angle - 360.0;
+    }
+    else if(dataSave.encoder_Angle<-180.0)
+    {
+        dataSave.encoder_Angle = dataSave.encoder_Angle + 360.0;
+    }
+
+    location.speed_Left_w = (tick_meter * (dataSave.encoder_Left - dataSave.encoder_Left_prev));
+    location.speed_Right_w = tick_meter * (dataSave.encoder_Right - dataSave.encoder_Right_prev);
     location.speed = (location.speed_Left_w + location.speed_Right_w)/2;
 
-    dataSave.encoder_Left_prev = location.speed_Left_w;
-    dataSave.encoder_Right_prev = location.speed_Right_w;
+    dataSave.encoder_Left_prev = dataSave.encoder_Left;
+    dataSave.encoder_Right_prev = dataSave.encoder_Right;
 
-    location.act_posX = location.act_posX + (location.speed * cos(dataSave.encoder_Angle*PI/180.0));
-    location.act_posY = location.act_posY + (location.speed * sin(dataSave.encoder_Angle*PI/180.0));
-
-    ///tu mozete robit s datami z robota
-    /// ale nic vypoctovo narocne - to iste vlakno ktore cita data z robota
-    ///teraz tu posielam rychlosti na zaklade toho co setne joystick a vypisujeme data z robota(kazdy 5ty krat. ale mozete skusit aj castejsie). vyratajte si polohu. a vypiste spravnu
-    /// tuto joystick cast mozete vklude vymazat,alebo znasilnit na vas regulator alebo ake mate pohnutky
-//    if(forwardspeed==0 && rotationspeed!=0)
-//        robot.setRotationSpeed(rotationspeed);
-//    else if(forwardspeed!=0 && rotationspeed==0)
-//        robot.setTranslationSpeed(forwardspeed);
-//    else if((forwardspeed!=0 && rotationspeed!=0))
-//        robot.setArcSpeed(forwardspeed,forwardspeed/rotationspeed);
-//    else
-//        robot.setTranslationSpeed(0);
-
+    if((location.speed_Left_w>0 && location.speed_Right_w >0) || (location.speed_Left_w<0 && location.speed_Right_w<0))
+    {
+        location.act_posX = location.act_posX + (location.speed * cos(dataSave.encoder_Angle*PI/180.0));
+        location.act_posY = location.act_posY + (location.speed * sin(dataSave.encoder_Angle*PI/180.0));
+    }
 ///TU PISTE KOD... TOTO JE TO MIESTO KED NEVIETE KDE ZACAT,TAK JE TO NAOZAJ TU. AK AJ TAK NEVIETE, SPYTAJTE SA CVICIACEHO MA TU NATO STRING KTORY DA DO HLADANIA XXX
 
     if(datacounter%5)
     {
-
-        ///ak nastavite hodnoty priamo do prvkov okna,ako je to na tychto zakomentovanych riadkoch tak sa moze stat ze vam program padne
-                // ui->lineEdit_2->setText(QString::number(robotdata.EncoderRight));
-                //ui->lineEdit_3->setText(QString::number(robotdata.EncoderLeft));
-                //ui->lineEdit_4->setText(QString::number(robotdata.GyroAngle));
-                /// lepsi pristup je nastavit len nejaku premennu, a poslat signal oknu na prekreslenie
-                /// okno pocuva vo svojom slote a vasu premennu nastavi tak ako chcete. prikaz emit to presne takto spravi
-                /// viac o signal slotoch tu: https://doc.qt.io/qt-5/signalsandslots.html
         ///posielame sem nezmysli.. pohrajte sa nech sem idu zmysluplne veci
-        emit uiValuesChanged(location.act_posX, location.act_posY, location.act_agl);
-        ///toto neodporucam na nejake komplikovane struktury.signal slot robi kopiu dat. radsej vtedy posielajte
-        /// prazdny signal a slot bude vykreslovat strukturu (vtedy ju musite mat samozrejme ako member premmennu v mainwindow.ak u niekoho najdem globalnu premennu,tak bude cistit bludisko zubnou kefkou.. kefku dodam)
-        /// vtedy ale odporucam pouzit mutex, aby sa vam nestalo ze budete pocas vypisovania prepisovat niekde inde
 
+        emit uiValuesChanged(location.act_posX, location.act_posY, dataSave.encoder_Angle);
     }
     datacounter++;
 
-    return 0;
+
     }
+    return 0;
 }
 
 ///toto je calback na data z lidaru, ktory ste podhodili robotu vo funkcii on_pushButton_9_clicked
 /// vola sa ked dojdu nove data z lidaru
 int MainWindow::processThisLidar(LaserMeasurement laserData)
 {
-
-
     memcpy( &copyOfLaserData,&laserData,sizeof(LaserMeasurement));
     //tu mozete robit s datami z lidaru.. napriklad najst prekazky, zapisat do mapy. naplanovat ako sa prekazke vyhnut.
     // ale nic vypoctovo narocne - to iste vlakno ktore cita data z lidaru
@@ -173,7 +176,7 @@ int MainWindow::processThisLidar(LaserMeasurement laserData)
 
 void MainWindow::on_pushButton_9_clicked() //start button
 {
-
+    dataSave.stop = false;
     forwardspeed=0;
     rotationspeed=0;
     //tu sa nastartuju vlakna ktore citaju data z lidaru a robota
@@ -208,14 +211,14 @@ void MainWindow::on_pushButton_3_clicked() //back
 void MainWindow::on_pushButton_6_clicked() //left
 {
     dataSave.stop = true;
-robot.setRotationSpeed(3.14159/2);
+    robot.setRotationSpeed(3.14159/2);
 
 }
 
 void MainWindow::on_pushButton_5_clicked()//right
 {
     dataSave.stop = true;
-robot.setRotationSpeed(-3.14159/2);
+    robot.setRotationSpeed(-3.14159/2);
 
 }
 
