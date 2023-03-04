@@ -102,13 +102,19 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     }
 
     dataSave.encoder_Left = robotdata.EncoderLeft;
+    cout<<"prijebany enkoder"<<endl;
+    cout<<robotdata.EncoderLeft<<endl;
     dataSave.encoder_Right = robotdata.EncoderRight;
 
+//    if (dataSave.encoder_Left_prev - dataSave.encoder_Left > 60000){
+//         location.speed_Left_w =(tick_meter * (dataSave.encoder_Left - dataSave.encoder_Left_prev + 65535));
+//    }
+//    else if()
     if(dataSave.encoder_Left_prev - dataSave.encoder_Left > 60000)
     {
         dataSave.encoder_Left_prev = -(65535 - dataSave.encoder_Left_prev);
     }
-    else if(dataSave.encoder_Left_prev - dataSave.encoder_Left > -60000)
+    else if(dataSave.encoder_Left_prev - dataSave.encoder_Left < -60000)
     {
          dataSave.encoder_Left_prev = 65535 + dataSave.encoder_Left_prev;
     }
@@ -116,7 +122,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     {
         dataSave.encoder_Right_prev = -(65535 - dataSave.encoder_Right_prev);
     }
-    else if(dataSave.encoder_Right_prev - dataSave.encoder_Right > -60000)
+    else if(dataSave.encoder_Right_prev - dataSave.encoder_Right < -60000)
     {
          dataSave.encoder_Right_prev = 65535 + dataSave.encoder_Right_prev;
     }
@@ -137,12 +143,14 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 
     dataSave.encoder_Left_prev = dataSave.encoder_Left;
     dataSave.encoder_Right_prev = dataSave.encoder_Right;
+    cout<<"PRIJEBANY SPEED L WHEEL"<<endl;
+    cout<<location.speed_Left_w<<endl;
+    cout<<location.speed_Right_w<<endl;
 
-    if((location.speed_Left_w>0 && location.speed_Right_w >0) || (location.speed_Left_w<0 && location.speed_Right_w<0))
-    {
-        location.act_posX = location.act_posX + (location.speed * cos(dataSave.encoder_Angle*PI/180.0));
-        location.act_posY = location.act_posY + (location.speed * sin(dataSave.encoder_Angle*PI/180.0));
-    }
+
+    location.act_posX = location.act_posX + (location.speed * cos(dataSave.encoder_Angle*PI/180.0));
+    location.act_posY = location.act_posY + (location.speed * sin(dataSave.encoder_Angle*PI/180.0));
+
 ///TU PISTE KOD... TOTO JE TO MIESTO KED NEVIETE KDE ZACAT,TAK JE TO NAOZAJ TU. AK AJ TAK NEVIETE, SPYTAJTE SA CVICIACEHO MA TU NATO STRING KTORY DA DO HLADANIA XXX
 
     if(datacounter%5)
