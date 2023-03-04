@@ -92,7 +92,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 {
     if(dataSave.stop==true)
     {
-    if(dataSave.init==true)
+    if(dataSave.init==true) // inicializujeme data
     {
         dataSave.encoder_Left_prev = robotdata.EncoderLeft;
         dataSave.encoder_Right_prev = robotdata.EncoderRight;
@@ -102,14 +102,9 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     }
 
     dataSave.encoder_Left = robotdata.EncoderLeft;
-    cout<<"prijebany enkoder"<<endl;
-    cout<<robotdata.EncoderLeft<<endl;
     dataSave.encoder_Right = robotdata.EncoderRight;
 
-//    if (dataSave.encoder_Left_prev - dataSave.encoder_Left > 60000){
-//         location.speed_Left_w =(tick_meter * (dataSave.encoder_Left - dataSave.encoder_Left_prev + 65535));
-//    }
-//    else if()
+    //pretečenie riešime
     if(dataSave.encoder_Left_prev - dataSave.encoder_Left > 60000)
     {
         dataSave.encoder_Left_prev = -(65535 - dataSave.encoder_Left_prev);
@@ -126,7 +121,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     {
          dataSave.encoder_Right_prev = 65535 + dataSave.encoder_Right_prev;
     }
-
+    //počítame a riešime uhol
     dataSave.encoder_Angle = robotdata.GyroAngle/100.0 - dataSave.encoder_Angle_prev;
     if(dataSave.encoder_Angle >180.0)
     {
@@ -137,25 +132,23 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
         dataSave.encoder_Angle = dataSave.encoder_Angle + 360.0;
     }
 
-    location.speed_Left_w = (tick_meter * (dataSave.encoder_Left - dataSave.encoder_Left_prev));
-    location.speed_Right_w = tick_meter * (dataSave.encoder_Right - dataSave.encoder_Right_prev);
-    location.speed = (location.speed_Left_w + location.speed_Right_w)/2;
+    // počítanie vzdialenosti
+    location.distance_Left_w = (tick_meter * (dataSave.encoder_Left - dataSave.encoder_Left_prev));
+    location.distance_Right_w = tick_meter * (dataSave.encoder_Right - dataSave.encoder_Right_prev);
+    location.distance = (location.distance_Left_w + location.distance_Right_w)/2;
 
     dataSave.encoder_Left_prev = dataSave.encoder_Left;
     dataSave.encoder_Right_prev = dataSave.encoder_Right;
-    cout<<"PRIJEBANY SPEED L WHEEL"<<endl;
-    cout<<location.speed_Left_w<<endl;
-    cout<<location.speed_Right_w<<endl;
 
-
-    location.act_posX = location.act_posX + (location.speed * cos(dataSave.encoder_Angle*PI/180.0));
-    location.act_posY = location.act_posY + (location.speed * sin(dataSave.encoder_Angle*PI/180.0));
+    //vypočítane pozície x,y a uhla
+    location.act_posX = location.act_posX + (location.distance * cos(dataSave.encoder_Angle*PI/180.0));
+    location.act_posY = location.act_posY + (location.distance * sin(dataSave.encoder_Angle*PI/180.0));
 
 ///TU PISTE KOD... TOTO JE TO MIESTO KED NEVIETE KDE ZACAT,TAK JE TO NAOZAJ TU. AK AJ TAK NEVIETE, SPYTAJTE SA CVICIACEHO MA TU NATO STRING KTORY DA DO HLADANIA XXX
 
     if(datacounter%5)
     {
-        ///posielame sem nezmysli.. pohrajte sa nech sem idu zmysluplne veci
+        ///tu zapisujeme tak aby sme to uvideli v GUI
 
         emit uiValuesChanged(location.act_posX, location.act_posY, dataSave.encoder_Angle);
     }
