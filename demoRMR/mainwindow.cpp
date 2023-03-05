@@ -90,29 +90,18 @@ void  MainWindow::setUiValues(double robotX,double robotY,double robotFi)
 Data dataSave; //ukladame data
 Location location;
 
-/////////////////////////
-double calculateAngle(double x1, double y1, double x2, double y2) {
 
-    double angle = atan2(y2 - y1, x2 - x1);
-    angle = angle * 180.0 / 3.14159265358979323846;
-    return angle;
+void inicialzation(TKobukiData robotdata){
+    dataSave.encoder_Left_prev = robotdata.EncoderLeft;
+    dataSave.encoder_Right_prev = robotdata.EncoderRight;
+    dataSave.encoder_Angle_prev = robotdata.GyroAngle/100.0;
+
+    dataSave.init = false;
 }
-///////////////////////
 
-int MainWindow::processThisRobot(TKobukiData robotdata)
-{
-    if(dataSave.init==true) // inicializujeme data
-    {
-        dataSave.encoder_Left_prev = robotdata.EncoderLeft;
-        dataSave.encoder_Right_prev = robotdata.EncoderRight;
-        dataSave.encoder_Angle_prev = robotdata.GyroAngle/100.0;
-
-        dataSave.init = false;
-    }
-
+void locationPositon(TKobukiData robotdata){
     dataSave.encoder_Left = robotdata.EncoderLeft;
     dataSave.encoder_Right = robotdata.EncoderRight;
-
     //pretečenie riešime
     if(dataSave.encoder_Left_prev - dataSave.encoder_Left > 60000)
     {
@@ -140,7 +129,9 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     {
         dataSave.encoder_Angle = dataSave.encoder_Angle + 360.0;
     }
+}
 
+void calculatingDistance(){
     // počítanie vzdialenosti
     location.distance_Left_w = (tick_meter * (dataSave.encoder_Left - dataSave.encoder_Left_prev));
     location.distance_Right_w = tick_meter * (dataSave.encoder_Right - dataSave.encoder_Right_prev);
@@ -152,6 +143,36 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     //vypočítane pozície x,y a uhla
     location.act_posX = location.act_posX + (location.distance * cos(dataSave.encoder_Angle*PI/180.0));
     location.act_posY = location.act_posY + (location.distance * sin(dataSave.encoder_Angle*PI/180.0));
+}
+
+/////////////////////////
+double calculateAngle(double x1, double y1, double x2, double y2) {
+
+    double angle = atan2(y2 - y1, x2 - x1);
+    angle = angle * 180.0 / 3.14159265358979323846;
+    return angle;
+}
+///////////////////////
+
+int MainWindow::processThisRobot(TKobukiData robotdata)
+{
+    if(dataSave.init==true) // inicializujeme data
+    {
+        inicialzation(robotdata);
+    }
+    locationPositon(robotdata);
+    calculatingDistance();
+    // počítanie vzdialenosti
+//    location.distance_Left_w = (tick_meter * (dataSave.encoder_Left - dataSave.encoder_Left_prev));
+//    location.distance_Right_w = tick_meter * (dataSave.encoder_Right - dataSave.encoder_Right_prev);
+//    location.distance = (location.distance_Left_w + location.distance_Right_w)/2;
+
+//    dataSave.encoder_Left_prev = dataSave.encoder_Left;
+//    dataSave.encoder_Right_prev = dataSave.encoder_Right;
+
+//    //vypočítane pozície x,y a uhla
+//    location.act_posX = location.act_posX + (location.distance * cos(dataSave.encoder_Angle*PI/180.0));
+//    location.act_posY = location.act_posY + (location.distance * sin(dataSave.encoder_Angle*PI/180.0));
 
 ///TU PISTE KOD... TOTO JE TO MIESTO KED NEVIETE KDE ZACAT,TAK JE TO NAOZAJ TU. AK AJ TAK NEVIETE, SPYTAJTE SA CVICIACEHO MA TU NATO STRING KTORY DA DO HLADANIA XXX
 
