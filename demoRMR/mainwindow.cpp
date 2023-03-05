@@ -4,8 +4,8 @@
 #include <math.h>
 ///Adko a Majko2 a Matko
 
-const double koncovyX = 0.2;
-const double koncovyY = 0;
+const double koncovyX = -0.2;
+const double koncovyY = 2.8;
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -89,6 +89,7 @@ void  MainWindow::setUiValues(double robotX,double robotY,double robotFi)
 
 Data dataSave; //ukladame data
 Location location;
+Engine engine;
 
 
 void inicialzation(TKobukiData robotdata){
@@ -177,15 +178,28 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     ciselko = calculateAngle(location.act_posX, location.act_posY, koncovyX, koncovyY);
     printf("pozadovany uhol %f\n",ciselko);
 
-    if ((dataSave.encoder_Angle < ciselko + 5) && (dataSave.encoder_Angle > ciselko - 5)) {
-        printf("som v zone\n");
-        robot.setTranslationSpeed(500);
+
+    if((location.act_posX<koncovyX+0.5 && location.act_posX>koncovyX-0.5) && (location.act_posY<koncovyY+0.5 && location.act_posY>koncovyY-0.5)){
+        engine.engineFire = false;
+        robot.setTranslationSpeed(0);
     }
 
-    if ((dataSave.encoder_Angle > ciselko + 5) || (dataSave.encoder_Angle < ciselko - 5)) {
-        printf("som mimo zony\n");
-        robot.setRotationSpeed(1);
+
+    if (engine.engineFire == true) {
+
+        if ((dataSave.encoder_Angle < ciselko + 5) && (dataSave.encoder_Angle > ciselko - 5)) {
+            printf("som v zone\n");
+            robot.setTranslationSpeed(500);
+        }
+
+        if ((dataSave.encoder_Angle > ciselko + 5) || (dataSave.encoder_Angle < ciselko - 5)) {
+            printf("som mimo zony\n");
+            robot.setRotationSpeed(1);
+        }
+
     }
+
+
 
 
 

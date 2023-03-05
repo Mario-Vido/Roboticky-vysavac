@@ -25,7 +25,7 @@ const double b = 0.23;
 
 
 
-typedef struct
+typedef struct b
 {
     bool init = true;
     double encoder_Left_prev;
@@ -42,7 +42,7 @@ typedef struct
 
 }Data;
 
-typedef struct
+typedef struct a
 {
     double distance_Left_w;
     double distance_Right_w;
@@ -52,6 +52,12 @@ typedef struct
     double act_posY             = 0.0;
     double act_agl              = 0.0;
 }Location;
+
+typedef struct c
+{
+    bool engineFire = true;
+
+}Engine;
 
 namespace Ui {
 class MainWindow;
