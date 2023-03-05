@@ -4,8 +4,8 @@
 #include <math.h>
 ///Adko a Majko2 a Matko
 
-const double koncovyX = -0.2;
-const double koncovyY = 3;
+const double koncovyX = 0.2;
+const double koncovyY = 0;
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -186,6 +186,8 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
         printf("som mimo zony\n");
         robot.setRotationSpeed(1);
     }
+
+
 
  //////////////koncim pid////////////////////////
 
