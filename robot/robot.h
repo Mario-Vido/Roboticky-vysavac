@@ -59,7 +59,7 @@ public:
     }
 
     void setTranslationSpeed(int mmpersec);
-
+    int getTranslationSpeed();
     void setRotationSpeed(double radpersec);
     void setArcSpeed(int mmpersec,int radius);
 #ifdef useCamera
@@ -77,6 +77,7 @@ private:
     int wasLaserSet;
     int wasRobotSet;
     int wasCameraSet;
+    int translation_speed;
     //veci na laser
     LaserMeasurement copyOfLaserData;
     void laserprocess();

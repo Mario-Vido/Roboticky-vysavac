@@ -140,6 +140,11 @@ void Robot::setTranslationSpeed(int mmpersec)
     }
 }
 
+int Robot::getTranslationSpeed()
+{
+    return translation_speed;
+}
+
 void Robot::setRotationSpeed(double radpersec) //left
 {
 

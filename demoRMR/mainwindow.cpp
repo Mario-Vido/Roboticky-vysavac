@@ -5,7 +5,8 @@
 ///Adko a Majko2 a Matko
 
 const double koncovyX = -0.2;
-const double koncovyY = 2.8;
+const double koncovyY = 3.5;
+int pocitadlo = 0;
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -96,7 +97,6 @@ void inicialzation(TKobukiData robotdata){
     dataSave.encoder_Left_prev = robotdata.EncoderLeft;
     dataSave.encoder_Right_prev = robotdata.EncoderRight;
     dataSave.encoder_Angle_prev = robotdata.GyroAngle/100.0;
-
     dataSave.init = false;
 }
 
@@ -120,6 +120,9 @@ void locationPositon(TKobukiData robotdata){
     {
          dataSave.encoder_Right_prev = 65535 + dataSave.encoder_Right_prev;
     }
+}
+
+void calculatingDistance(TKobukiData robotdata){
     //počítame a riešime uhol
     dataSave.encoder_Angle = robotdata.GyroAngle/100.0 - dataSave.encoder_Angle_prev;
     if(dataSave.encoder_Angle >180.0)
@@ -130,9 +133,6 @@ void locationPositon(TKobukiData robotdata){
     {
         dataSave.encoder_Angle = dataSave.encoder_Angle + 360.0;
     }
-}
-
-void calculatingDistance(){
     // počítanie vzdialenosti
     location.distance_Left_w = (tick_meter * (dataSave.encoder_Left - dataSave.encoder_Left_prev));
     location.distance_Right_w = tick_meter * (dataSave.encoder_Right - dataSave.encoder_Right_prev);
@@ -144,6 +144,7 @@ void calculatingDistance(){
     //vypočítane pozície x,y a uhla
     location.act_posX = location.act_posX + (location.distance * cos(dataSave.encoder_Angle*PI/180.0));
     location.act_posY = location.act_posY + (location.distance * sin(dataSave.encoder_Angle*PI/180.0));
+    engine.pointAToPoinB = sqrt(pow(koncovyX,2)+pow(koncovyY,2))/100;
 }
 
 /////////////////////////
@@ -162,7 +163,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
         inicialzation(robotdata);
     }
     locationPositon(robotdata);
-    calculatingDistance();
+    calculatingDistance(robotdata);
 
     if(datacounter%5)
     {
@@ -179,7 +180,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     printf("pozadovany uhol %f\n",ciselko);
 
 
-    if((location.act_posX<koncovyX+0.5 && location.act_posX>koncovyX-0.5) && (location.act_posY<koncovyY+0.5 && location.act_posY>koncovyY-0.5)){
+    if((location.act_posX<koncovyX+0.05 && location.act_posX>koncovyX-0.05) && (location.act_posY<koncovyY+0.05 && location.act_posY>koncovyY-0.05)){
         engine.engineFire = false;
         robot.setTranslationSpeed(0);
     }
@@ -189,7 +190,15 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 
         if ((dataSave.encoder_Angle < ciselko + 5) && (dataSave.encoder_Angle > ciselko - 5)) {
             printf("som v zone\n");
-            robot.setTranslationSpeed(500);
+                if (location.distance<=engine.pointAToPoinB*0.4 && pocitadlo<500 ){
+                    printf("distance: %d\n",robot.getTranslationSpeed());
+                    pocitadlo=pocitadlo+((engine.pointAToPoinB*0.4)*500); // vypocitať vzdialenost + rychlosť tak aby 500 sa rozdelilo rovnomerne na vzdialenosť 40%
+                    printf("pocitadlo %d",pocitadlo);
+                    robot.setTranslationSpeed(pocitadlo);
+                }
+                else{
+                    robot.setTranslationSpeed(500);
+                }
         }
 
         if ((dataSave.encoder_Angle > ciselko + 5) || (dataSave.encoder_Angle < ciselko - 5)) {

@@ -39,7 +39,6 @@ typedef struct b
     double diff_Left;
     double diff_Right;
     bool stop;
-
 }Data;
 
 typedef struct a
@@ -56,7 +55,7 @@ typedef struct a
 typedef struct c
 {
     bool engineFire = true;
-
+    double pointAToPoinB;
 }Engine;
 
 namespace Ui {
