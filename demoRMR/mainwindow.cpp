@@ -162,24 +162,10 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     }
     locationPositon(robotdata);
     calculatingDistance();
-    // počítanie vzdialenosti
-//    location.distance_Left_w = (tick_meter * (dataSave.encoder_Left - dataSave.encoder_Left_prev));
-//    location.distance_Right_w = tick_meter * (dataSave.encoder_Right - dataSave.encoder_Right_prev);
-//    location.distance = (location.distance_Left_w + location.distance_Right_w)/2;
-
-//    dataSave.encoder_Left_prev = dataSave.encoder_Left;
-//    dataSave.encoder_Right_prev = dataSave.encoder_Right;
-
-//    //vypočítane pozície x,y a uhla
-//    location.act_posX = location.act_posX + (location.distance * cos(dataSave.encoder_Angle*PI/180.0));
-//    location.act_posY = location.act_posY + (location.distance * sin(dataSave.encoder_Angle*PI/180.0));
-
-///TU PISTE KOD... TOTO JE TO MIESTO KED NEVIETE KDE ZACAT,TAK JE TO NAOZAJ TU. AK AJ TAK NEVIETE, SPYTAJTE SA CVICIACEHO MA TU NATO STRING KTORY DA DO HLADANIA XXX
 
     if(datacounter%5)
     {
         ///tu zapisujeme tak aby sme to uvideli v GUI
-
         emit uiValuesChanged(location.act_posX, location.act_posY, dataSave.encoder_Angle);
     }
     datacounter++;
