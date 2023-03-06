@@ -184,27 +184,27 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 //        engine.engineFire = false;
 //        robot.setTranslationSpeed(0);
 //    }
-    if(((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100) < pow(0.01,2)){ //doncit toto okolie spraviť aby zastalo
+    if(((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100) < pow(0.005,2)){
         engine.engineFire = false;
         robot.setTranslationSpeed(0);
-        printf("pozicia v kruznici: %f \n",(pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100);
-        printf("obsah kurznice: %f\n",pow(0.01,2));
     }
     else if (engine.engineFire == true) {
+        printf("rychlost s getera: %d\n",robot.getTranslationSpeed());
         if ((dataSave.encoder_Angle < ciselko + 5) && (dataSave.encoder_Angle > ciselko - 5)) {
             printf("som v zone\n");
             if (location.distance<=engine.pointAToPoinB*0.4 && engine.speedingUp<500 ){
                 engine.speedingUp=engine.speedingUp+((engine.pointAToPoinB)*500);
                 robot.setTranslationSpeed(engine.speedingUp);
                 }
-            else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <=pow(engine.pointAToPoinB,2) && engine.speedingDown>50){ // spomalenie treba upraviť aby postune spomalovalo
-                printf("preslo\n");
-                engine.speedingDown=engine.speedingDown-((engine.pointAToPoinB)*500);
-                printf("speedingDown %d\n",engine.speedingDown);
+            else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <= pow(0.05,2) && engine.speedingDown>100){ // spomalenie treba upraviť aby postune spomalovalo
+                printf("position: %f\n",(pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100);
+                engine.speedingDown=engine.speedingDown-((engine.pointAToPoinB/2)*500);
+                printf("pointAtoPointB %f\n",engine.pointAToPoinB-(engine.pointAToPoinB*0.1));
                 robot.setTranslationSpeed(engine.speedingDown);
             }
-            else if(engine.speedingDown<50){
-                robot.setTranslationSpeed(40);
+            else if(engine.speedingDown<=100){
+                engine.speedingDown=90;
+                robot.setTranslationSpeed(90);
             }
             else {
                 robot.setRotationSpeed(0);
