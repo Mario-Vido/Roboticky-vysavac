@@ -56,6 +56,8 @@ typedef struct c
 {
     bool engineFire = true;
     double pointAToPoinB;
+    int speedingUp = 0;
+    int speedingDown = 500;
 }Engine;
 
 namespace Ui {

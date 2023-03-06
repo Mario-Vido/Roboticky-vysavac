@@ -61,6 +61,7 @@ public:
     void setTranslationSpeed(int mmpersec);
     int getTranslationSpeed();
     void setRotationSpeed(double radpersec);
+    int getRotationSpeed();
     void setArcSpeed(int mmpersec,int radius);
 #ifdef useCamera
     void setCameraParameters(std::string link,std::function<int(cv::Mat)> callback )
@@ -78,6 +79,7 @@ private:
     int wasRobotSet;
     int wasCameraSet;
     int translation_speed;
+    int rotationSpeed;
     //veci na laser
     LaserMeasurement copyOfLaserData;
     void laserprocess();

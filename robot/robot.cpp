@@ -138,6 +138,7 @@ void Robot::setTranslationSpeed(int mmpersec)
     {
 
     }
+    this -> translation_speed = mmpersec;
 }
 
 int Robot::getTranslationSpeed()
@@ -153,6 +154,12 @@ void Robot::setRotationSpeed(double radpersec) //left
     {
 
     }
+    this -> rotationSpeed = radpersec;
+}
+
+int Robot::getRotationSpeed()
+{
+    return rotationSpeed;
 }
 
  void Robot::setArcSpeed(int mmpersec,int radius)

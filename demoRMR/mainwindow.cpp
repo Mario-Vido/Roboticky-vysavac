@@ -187,22 +187,32 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 
 
     if (engine.engineFire == true) {
-
         if ((dataSave.encoder_Angle < ciselko + 5) && (dataSave.encoder_Angle > ciselko - 5)) {
             printf("som v zone\n");
-                if (location.distance<=engine.pointAToPoinB*0.4 && pocitadlo<500 ){
-                    printf("distance: %d\n",robot.getTranslationSpeed());
-                    pocitadlo=pocitadlo+((engine.pointAToPoinB*0.4)*500); // vypocitať vzdialenost + rychlosť tak aby 500 sa rozdelilo rovnomerne na vzdialenosť 40%
-                    printf("pocitadlo %d",pocitadlo);
-                    robot.setTranslationSpeed(pocitadlo);
+            if (location.distance<=engine.pointAToPoinB*0.4 && engine.speedingUp<500 ){
+                engine.speedingUp=engine.speedingUp+((engine.pointAToPoinB*0.2)*500);
+                robot.setTranslationSpeed(engine.speedingUp);
                 }
-                else{
-                    robot.setTranslationSpeed(500);
-                }
+//            else if (location.distance>=(engine.pointAToPoinB-(engine.pointAToPoinB*0.4)) && engine.speedingDown>=0){
+//                engine.speedingDown=engine.speedingDown-((engine.pointAToPoinB*0.4)*500);
+//                printf("speedingDown %d\n",engine.speedingDown);
+//                robot.setTranslationSpeed(engine.speedingDown);
+//            }
+//            else if((location.act_posX>(1-0.4)*koncovyX && location.act_posY>(1-0.4)*koncovyY) && engine.speedingDown>10){
+//                printf("preslo\n");
+//                engine.speedingDown=engine.speedingDown-((engine.pointAToPoinB*0.4)*500);
+//                printf("speedingDown %d\n",engine.speedingDown);
+//                robot.setTranslationSpeed(engine.speedingDown);
+//            }
+            else {
+                robot.setRotationSpeed(0);
+                robot.setTranslationSpeed(500);
+            }
         }
 
         if ((dataSave.encoder_Angle > ciselko + 5) || (dataSave.encoder_Angle < ciselko - 5)) {
             printf("som mimo zony\n");
+            robot.setTranslationSpeed(0);
             robot.setRotationSpeed(1);
         }
 
