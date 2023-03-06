@@ -174,36 +174,38 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 
  ///////////////zacinap pid//////////////////////
 
-    printf("moj uhol %f\n",dataSave.encoder_Angle);
+//    printf("moj uhol %f\n",dataSave.encoder_Angle);
     double ciselko;
     ciselko = calculateAngle(location.act_posX, location.act_posY, koncovyX, koncovyY);
-    printf("pozadovany uhol %f\n",ciselko);
+//    printf("pozadovany uhol %f\n",ciselko);
 
 
-    if((location.act_posX<koncovyX+0.05 && location.act_posX>koncovyX-0.05) && (location.act_posY<koncovyY+0.05 && location.act_posY>koncovyY-0.05)){
+//    if((location.act_posX<koncovyX+0.05 && location.act_posX>koncovyX-0.05) && (location.act_posY<koncovyY+0.05 && location.act_posY>koncovyY-0.05)){
+//        engine.engineFire = false;
+//        robot.setTranslationSpeed(0);
+//    }
+    if(((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100) < pow(0.01,2)){ //doncit toto okolie spraviť aby zastalo
         engine.engineFire = false;
         robot.setTranslationSpeed(0);
+        printf("pozicia v kruznici: %f \n",(pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100);
+        printf("obsah kurznice: %f\n",pow(0.01,2));
     }
-
-
-    if (engine.engineFire == true) {
+    else if (engine.engineFire == true) {
         if ((dataSave.encoder_Angle < ciselko + 5) && (dataSave.encoder_Angle > ciselko - 5)) {
             printf("som v zone\n");
             if (location.distance<=engine.pointAToPoinB*0.4 && engine.speedingUp<500 ){
-                engine.speedingUp=engine.speedingUp+((engine.pointAToPoinB*0.2)*500);
+                engine.speedingUp=engine.speedingUp+((engine.pointAToPoinB)*500);
                 robot.setTranslationSpeed(engine.speedingUp);
                 }
-//            else if (location.distance>=(engine.pointAToPoinB-(engine.pointAToPoinB*0.4)) && engine.speedingDown>=0){
-//                engine.speedingDown=engine.speedingDown-((engine.pointAToPoinB*0.4)*500);
-//                printf("speedingDown %d\n",engine.speedingDown);
-//                robot.setTranslationSpeed(engine.speedingDown);
-//            }
-//            else if((location.act_posX>(1-0.4)*koncovyX && location.act_posY>(1-0.4)*koncovyY) && engine.speedingDown>10){
-//                printf("preslo\n");
-//                engine.speedingDown=engine.speedingDown-((engine.pointAToPoinB*0.4)*500);
-//                printf("speedingDown %d\n",engine.speedingDown);
-//                robot.setTranslationSpeed(engine.speedingDown);
-//            }
+            else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <=pow(engine.pointAToPoinB,2) && engine.speedingDown>50){ // spomalenie treba upraviť aby postune spomalovalo
+                printf("preslo\n");
+                engine.speedingDown=engine.speedingDown-((engine.pointAToPoinB)*500);
+                printf("speedingDown %d\n",engine.speedingDown);
+                robot.setTranslationSpeed(engine.speedingDown);
+            }
+            else if(engine.speedingDown<50){
+                robot.setTranslationSpeed(40);
+            }
             else {
                 robot.setRotationSpeed(0);
                 robot.setTranslationSpeed(500);
@@ -217,15 +219,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
         }
 
     }
-
-
-
-
-
  //////////////koncim pid////////////////////////
-
-
-
     return 0;
 }
 
