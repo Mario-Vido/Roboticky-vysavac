@@ -184,7 +184,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 //        engine.engineFire = false;
 //        robot.setTranslationSpeed(0);
 //    }
-    if(((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100) < pow(0.005,2)){
+    if(((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100)  <pow(0.005,2)){
         engine.engineFire = false;
         robot.setTranslationSpeed(0);
     }
