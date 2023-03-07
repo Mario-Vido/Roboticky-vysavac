@@ -172,7 +172,7 @@ void MainWindow::PID(){
             if ((dataSave.encoder_Angle < ciselko + 5) && (dataSave.encoder_Angle > ciselko - 5)) {
                 printf("som v zone\n");
                 if (location.distance<=engine.pointAToPoinB*0.4 && engine.speedingUp<500 ){
-                    engine.speedingUp=engine.speedingUp+((engine.pointAToPoinB)*500);
+                    engine.speedingUp=engine.speedingUp+((engine.pointAToPoinB*0.8)*500);
                     robot.setTranslationSpeed(engine.speedingUp);
                     }
                 else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <= pow(0.05,2) && engine.speedingDown>100){ // spomalenie treba upraviť aby postune spomalovalo
