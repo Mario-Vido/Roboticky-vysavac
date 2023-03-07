@@ -88,6 +88,8 @@ public:
 
     void getData();
 
+    void PID();
+
     void getPosition();
 
 private slots:

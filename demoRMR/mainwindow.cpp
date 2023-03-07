@@ -154,6 +154,51 @@ double calculateAngle(double x1, double y1, double x2, double y2) {
     angle = angle * 180.0 / 3.14159265358979323846;
     return angle;
 }
+
+void MainWindow::PID(){
+    //    printf("moj uhol %f\n",dataSave.encoder_Angle);
+        double ciselko;
+        ciselko = calculateAngle(location.act_posX, location.act_posY, koncovyX, koncovyY);
+    //    printf("pozadovany uhol %f\n",ciselko)
+
+        if(((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100)  <pow(0.005,2)){
+            engine.engineFire = false;
+            robot.setTranslationSpeed(0);
+            engine.speedingDown=0;
+            printf("robot zastal\n");
+        }
+        else if (engine.engineFire == true) {
+            printf("rychlost s getera: %d\n",robot.getTranslationSpeed());
+            if ((dataSave.encoder_Angle < ciselko + 5) && (dataSave.encoder_Angle > ciselko - 5)) {
+                printf("som v zone\n");
+                if (location.distance<=engine.pointAToPoinB*0.4 && engine.speedingUp<500 ){
+                    engine.speedingUp=engine.speedingUp+((engine.pointAToPoinB)*500);
+                    robot.setTranslationSpeed(engine.speedingUp);
+                    }
+                else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <= pow(0.05,2) && engine.speedingDown>100){ // spomalenie treba upraviť aby postune spomalovalo
+                    printf("position: %f\n",(pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100);
+                    engine.speedingDown=engine.speedingDown-((engine.pointAToPoinB/2)*500);
+                    printf("pointAtoPointB %f\n",engine.pointAToPoinB-(engine.pointAToPoinB*0.1));
+                    robot.setTranslationSpeed(engine.speedingDown);
+                }
+                else if(engine.speedingDown<=100 && engine.speedingDown>0){
+                    engine.speedingDown=90;
+                    robot.setTranslationSpeed(90);
+                }
+                else {
+                    robot.setRotationSpeed(0);
+                    robot.setTranslationSpeed(500);
+                }
+            }
+
+            if ((dataSave.encoder_Angle > ciselko + 5) || (dataSave.encoder_Angle < ciselko - 5)) {
+                printf("som mimo zony\n");
+                robot.setTranslationSpeed(0);
+                robot.setRotationSpeed(1);
+            }
+
+        }
+}
 ///////////////////////
 
 int MainWindow::processThisRobot(TKobukiData robotdata)
@@ -173,52 +218,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     datacounter++;
 
  ///////////////zacinap pid//////////////////////
-
-//    printf("moj uhol %f\n",dataSave.encoder_Angle);
-    double ciselko;
-    ciselko = calculateAngle(location.act_posX, location.act_posY, koncovyX, koncovyY);
-//    printf("pozadovany uhol %f\n",ciselko);
-
-
-//    if((location.act_posX<koncovyX+0.05 && location.act_posX>koncovyX-0.05) && (location.act_posY<koncovyY+0.05 && location.act_posY>koncovyY-0.05)){
-//        engine.engineFire = false;
-//        robot.setTranslationSpeed(0);
-//    }
-    if(((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100)  <pow(0.005,2)){
-        engine.engineFire = false;
-        robot.setTranslationSpeed(0);
-    }
-    else if (engine.engineFire == true) {
-        printf("rychlost s getera: %d\n",robot.getTranslationSpeed());
-        if ((dataSave.encoder_Angle < ciselko + 5) && (dataSave.encoder_Angle > ciselko - 5)) {
-            printf("som v zone\n");
-            if (location.distance<=engine.pointAToPoinB*0.4 && engine.speedingUp<500 ){
-                engine.speedingUp=engine.speedingUp+((engine.pointAToPoinB)*500);
-                robot.setTranslationSpeed(engine.speedingUp);
-                }
-            else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <= pow(0.05,2) && engine.speedingDown>100){ // spomalenie treba upraviť aby postune spomalovalo
-                printf("position: %f\n",(pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100);
-                engine.speedingDown=engine.speedingDown-((engine.pointAToPoinB/2)*500);
-                printf("pointAtoPointB %f\n",engine.pointAToPoinB-(engine.pointAToPoinB*0.1));
-                robot.setTranslationSpeed(engine.speedingDown);
-            }
-            else if(engine.speedingDown<=100){
-                engine.speedingDown=90;
-                robot.setTranslationSpeed(90);
-            }
-            else {
-                robot.setRotationSpeed(0);
-                robot.setTranslationSpeed(500);
-            }
-        }
-
-        if ((dataSave.encoder_Angle > ciselko + 5) || (dataSave.encoder_Angle < ciselko - 5)) {
-            printf("som mimo zony\n");
-            robot.setTranslationSpeed(0);
-            robot.setRotationSpeed(1);
-        }
-
-    }
+    PID();
  //////////////koncim pid////////////////////////
     return 0;
 }
