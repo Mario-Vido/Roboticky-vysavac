@@ -156,45 +156,57 @@ double calculateAngle(double x1, double y1, double x2, double y2) {
 }
 
 void MainWindow::PID(){
-    //    printf("moj uhol %f\n",dataSave.encoder_Angle);
+    //   výpočet uhla a inicializovanie premennych
+        double tick = 4;
         double ciselko;
         ciselko = calculateAngle(location.act_posX, location.act_posY, koncovyX, koncovyY);
-    //    printf("pozadovany uhol %f\n",ciselko)
-
-        if(((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100)  <pow(0.005,2)){
+//        printf("pozadovany uhol %f\n",ciselko);
+        //okolie bodu kde sa chceme dostať, počítame obvod kruhu a následne vzdialenosť od stredu kruhu, ak vypočítana vzdialenosť od stredu je menšia ako vzdialenosť kružnice od kruhu tak zastavíme
+        if(((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100)  <pow(0.005,2)){ // rzchlost na yaklade vydialenosti k bodu
             engine.engineFire = false;
             robot.setTranslationSpeed(0);
+            printf("ciel");
             engine.speedingDown=0;
-            printf("robot zastal\n");
         }
         else if (engine.engineFire == true) {
-            printf("rychlost s getera: %d\n",robot.getTranslationSpeed());
-            if ((dataSave.encoder_Angle < ciselko + 5) && (dataSave.encoder_Angle > ciselko - 5)) {
-                printf("som v zone\n");
-                if (location.distance<=engine.pointAToPoinB*0.4 && engine.speedingUp<500 ){
-                    engine.speedingUp=engine.speedingUp+((engine.pointAToPoinB*0.8)*500);
+            // sledujeme či sa nachádzame v tom rozsahu akom sme vypočítali aby sme sa mohli dostať do bodu kde chceme
+            if ((dataSave.encoder_Angle < ciselko + 3) && (dataSave.encoder_Angle > ciselko - 3)) {
+                printf("rychlost s getera mimo zony: %d\n",robot.getTranslationSpeed());
+                // prva podmienka rovnaka ako pri zastavení len s vačšou vzdialenos´t kružnice od stredu && druha podmienka aby nám rychlosť nepreskočilo 500
+                if (engine.speedingUp<500 && pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2)/100 >= pow(0.05,2)){
+                    printf("zrychlujeme");                   
+                    engine.speedingUp=engine.speedingUp+tick;
+                    // uloženie poslednej rýchlosti do spomelania nech spomalujeme od tej rýchlosti kde sme skončili
+                    if(engine.speedingUp<500){
                     robot.setTranslationSpeed(engine.speedingUp);
+                    engine.speedingDown=engine.speedingUp;
                     }
-                else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <= pow(0.05,2) && engine.speedingDown>100){ // spomalenie treba upraviť aby postune spomalovalo
-                    printf("position: %f\n",(pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100);
-                    engine.speedingDown=engine.speedingDown-((engine.pointAToPoinB/2)*500);
-                    printf("pointAtoPointB %f\n",engine.pointAToPoinB-(engine.pointAToPoinB*0.1));
+                    }
+                // podmienka prvá rovnaká ako všetky s kruhom, ak je vzdialenosť od stredu manšia ako vzdialenosť od kružnice tak začneme spomalovať
+                //&& aby sme sa nedostali do záporných hodnôt tak spomalujeme len do 10
+                else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <= pow(0.05,2) && engine.speedingDown>10){
+                    printf("spomalovanie %f\n", (pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2)));
+                    // uložená rýchlosť sa postupne stále zmänšuječím bližšie ideme
+                    engine.speedingDown=engine.speedingDown - 500*(pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2));
+                    if(engine.speedingDown>500){
+                        engine.speedingDown=500;
+                    }
                     robot.setTranslationSpeed(engine.speedingDown);
                 }
-                else if(engine.speedingDown<=100 && engine.speedingDown>0){
-                    engine.speedingDown=90;
-                    robot.setTranslationSpeed(90);
+                else if(engine.speedingDown<=10 && engine.speedingDown>=0){
+                    engine.speedingDown=10;
+                    robot.setTranslationSpeed(10);
                 }
-                else {
-                    robot.setRotationSpeed(0);
-                    robot.setTranslationSpeed(500);
-                }
+//                else if (robot.getTranslationSpeed()>=500) {
+//                   // robot.setRotationSpeed(0);
+//                    robot.setTranslationSpeed(500);
+//                }
             }
 
-            if ((dataSave.encoder_Angle > ciselko + 5) || (dataSave.encoder_Angle < ciselko - 5)) {
-                printf("som mimo zony\n");
-                robot.setTranslationSpeed(0);
-                robot.setRotationSpeed(1);
+            else if ((dataSave.encoder_Angle > ciselko + 7) || (dataSave.encoder_Angle < ciselko - 7)) {
+                robot.setRotationSpeed(engine.Kp*(ciselko-dataSave.encoder_Angle));
+                printf("odtateto\n");
+                engine.speedingUp=0;
             }
 
         }

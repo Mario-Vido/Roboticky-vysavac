@@ -55,9 +55,11 @@ typedef struct a
 typedef struct c
 {
     bool engineFire = true;
+    bool helper = true;
     double pointAToPoinB;
     int speedingUp = 0;
     int speedingDown = 500;
+    double Kp=0.02;
 }Engine;
 
 namespace Ui {
