@@ -172,8 +172,8 @@ void MainWindow::PID(){
             // sledujeme či sa nachádzame v tom rozsahu akom sme vypočítali aby sme sa mohli dostať do bodu kde chceme
             if ((dataSave.encoder_Angle < ciselko + 3) && (dataSave.encoder_Angle > ciselko - 3)) {
                 printf("rychlost s getera mimo zony: %d\n",robot.getTranslationSpeed());
-                // prva podmienka rovnaka ako pri zastavení len s vačšou vzdialenos´t kružnice od stredu && druha podmienka aby nám rychlosť nepreskočilo 500
-                if (engine.speedingUp<500 && pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2)/100 >= pow(0.05,2)){
+                // prva podmienka rovnaka ako pri zastavení len s vačšou vzdialenost kružnice od stredu && druha podmienka aby nám rychlosť nepreskočilo 500
+                if (engine.speedingUp<500 && pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2)/100 >= pow(0.1,2)){
                     printf("zrychlujeme");                   
                     engine.speedingUp=engine.speedingUp+tick;
                     // uloženie poslednej rýchlosti do spomelania nech spomalujeme od tej rýchlosti kde sme skončili
@@ -184,18 +184,18 @@ void MainWindow::PID(){
                     }
                 // podmienka prvá rovnaká ako všetky s kruhom, ak je vzdialenosť od stredu manšia ako vzdialenosť od kružnice tak začneme spomalovať
                 //&& aby sme sa nedostali do záporných hodnôt tak spomalujeme len do 10
-                else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <= pow(0.05,2) && engine.speedingDown>10){
+                else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <= pow(0.1,2) && engine.speedingDown>30){
                     printf("spomalovanie %f\n", (pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2)));
                     // uložená rýchlosť sa postupne stále zmänšuječím bližšie ideme
-                    engine.speedingDown=engine.speedingDown - 500*(pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2));
+                    engine.speedingDown=engine.speedingDown - 250*(pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2));
                     if(engine.speedingDown>500){
                         engine.speedingDown=500;
                     }
                     robot.setTranslationSpeed(engine.speedingDown);
                 }
-                else if(engine.speedingDown<=10 && engine.speedingDown>=0){
-                    engine.speedingDown=10;
-                    robot.setTranslationSpeed(10);
+                else if(engine.speedingDown<=30 && engine.speedingDown>=0){
+                    engine.speedingDown=30;
+                    robot.setTranslationSpeed(30);
                 }
 //                else if (robot.getTranslationSpeed()>=500) {
 //                   // robot.setRotationSpeed(0);
