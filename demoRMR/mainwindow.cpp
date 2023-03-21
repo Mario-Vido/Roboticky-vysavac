@@ -4,8 +4,8 @@
 #include <math.h>
 ///Adko a Majko2 a Matko
 
-const double koncovyX = -0.2;
-const double koncovyY = 3.5;
+const double koncovyX = 3;
+const double koncovyY = 1;
 int pocitadlo = 0;
 
 
@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 
     //tu je napevno nastavena ip. treba zmenit na to co ste si zadali do text boxu alebo nejaku inu pevnu. co bude spravna
-    ipaddress="127.0.0.1"; //192.168.1.11 127.0.0.1
+    ipaddress="192.168.1.11"; //192.168.1.11 127.0.0.1
   //  cap.open("http://192.168.1.11:8000/stream.mjpg");
     ui->setupUi(this);
     datacounter=0;
@@ -173,40 +173,51 @@ void MainWindow::PID(){
             if ((dataSave.encoder_Angle < ciselko + 3) && (dataSave.encoder_Angle > ciselko - 3)) {
                 printf("rychlost s getera mimo zony: %d\n",robot.getTranslationSpeed());
                 // prva podmienka rovnaka ako pri zastavení len s vačšou vzdialenost kružnice od stredu && druha podmienka aby nám rychlosť nepreskočilo 500
-                if (engine.speedingUp<500 && pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2)/100 >= pow(0.1,2)){
+                if (engine.speedingUp<500 && pow(location.act_posX-koncovyX,2)/100 + pow(location.act_posY-koncovyY,2)/100 >= pow(0.1,2)){
                     printf("zrychlujeme");                   
                     engine.speedingUp=engine.speedingUp+tick;
                     // uloženie poslednej rýchlosti do spomelania nech spomalujeme od tej rýchlosti kde sme skončili
                     if(engine.speedingUp<500){
                     robot.setTranslationSpeed(engine.speedingUp);
-                    engine.speedingDown=engine.speedingUp;
+                    engine.speedingDown=engine.speedingUp/*100*(pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2))*/;
                     }
                     }
                 // podmienka prvá rovnaká ako všetky s kruhom, ak je vzdialenosť od stredu manšia ako vzdialenosť od kružnice tak začneme spomalovať
                 //&& aby sme sa nedostali do záporných hodnôt tak spomalujeme len do 10
-                else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <= pow(0.1,2) && engine.speedingDown>30){
+                else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <= pow(0.1,2) && engine.speedingDown>50){
                     printf("spomalovanie %f\n", (pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2)));
                     // uložená rýchlosť sa postupne stále zmänšuječím bližšie ideme
-                    engine.speedingDown=engine.speedingDown - 250*(pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2));
+                    engine.speedingDown=engine.speedingDown - 50*(pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2));
                     if(engine.speedingDown>500){
                         engine.speedingDown=500;
                     }
-                    robot.setTranslationSpeed(engine.speedingDown);
+                    else if ((engine.speedingDown - 25*(pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2)))<50){
+                        engine.speedingDown=50;
+                    }
+                    else{
+                        robot.setTranslationSpeed(engine.speedingDown);
+                    }
+
                 }
-                else if(engine.speedingDown<=30 && engine.speedingDown>=0){
-                    engine.speedingDown=30;
-                    robot.setTranslationSpeed(30);
+                else if(engine.speedingDown<=50 && engine.speedingDown>=0){
+                    engine.speedingDown=50;
+                    robot.setTranslationSpeed(50);
                 }
-//                else if (robot.getTranslationSpeed()>=500) {
-//                   // robot.setRotationSpeed(0);
-//                    robot.setTranslationSpeed(500);
-//                }
             }
 
             else if ((dataSave.encoder_Angle > ciselko + 7) || (dataSave.encoder_Angle < ciselko - 7)) {
-                robot.setRotationSpeed(engine.Kp*(ciselko-dataSave.encoder_Angle));
+                if(dataSave.encoder_Angle>ciselko+7){
+                   robot.setRotationSpeed((engine.Kp*(ciselko-dataSave.encoder_Angle)));
+                   engine.speedingUp=0;
+                   engine.speedingDown=0;
+                }
+                else if((dataSave.encoder_Angle < ciselko - 7)){
+                    robot.setRotationSpeed(engine.Kp*(ciselko-dataSave.encoder_Angle));
+                    engine.speedingUp=0;
+                    engine.speedingDown=0;
+                }
                 printf("odtateto\n");
-                engine.speedingUp=0;
+
             }
 
         }
