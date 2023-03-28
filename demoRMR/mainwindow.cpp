@@ -6,7 +6,11 @@
 
 const double koncovyX = 3;
 const double koncovyY = 1;
-int pocitadlo = 0;
+const int MAP_WIDTH = 600;
+const int MAP_HEIGHT = 500;
+int map1[MAP_WIDTH][MAP_HEIGHT] = {{0}};
+int p=0;
+const int radius = 100;
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -16,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 
     //tu je napevno nastavena ip. treba zmenit na to co ste si zadali do text boxu alebo nejaku inu pevnu. co bude spravna
-    ipaddress="192.168.1.11"; //192.168.1.11 127.0.0.1
+    ipaddress="127.0.0.1"; //192.168.1.11 127.0.0.1
   //  cap.open("http://192.168.1.11:8000/stream.mjpg");
     ui->setupUi(this);
     datacounter=0;
@@ -36,6 +40,8 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+Mapovanie mapovanie;
 
 void MainWindow::paintEvent(QPaintEvent *event)
 {
@@ -66,13 +72,27 @@ void MainWindow::paintEvent(QPaintEvent *event)
             painter.setPen(pero);
             //teraz tu kreslime random udaje... vykreslite to co treba... t.j. data z lidaru
          //   std::cout<<copyOfLaserData.numberOfScans<<std::endl;
+            int min_xp = rect.width() - rect.width() / 2;
+            int min_yp = rect.height() - rect.height() / 2;
+
             for(int k=0;k<copyOfLaserData.numberOfScans/*360*/;k++)
             {
+
                 int dist=copyOfLaserData.Data[k].scanDistance/20; ///vzdialenost nahodne predelena 20 aby to nejako vyzeralo v okne.. zmen podla uvazenia
                 int xp=rect.width()-(rect.width()/2+dist*2*sin((360.0-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().x(); //prepocet do obrazovky
                 int yp=rect.height()-(rect.height()/2+dist*2*cos((360.0-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().y();//prepocet do obrazovky
-                if(rect.contains(xp,yp))//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
+                if(rect.contains(xp,yp)){//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
                     painter.drawEllipse(QPoint(xp, yp),2,2);
+                }
+
+                if(p==0){
+                    xp -= min_xp;
+                    yp -= min_yp;
+                    p=1;
+                }
+                if (xp>= 0 && xp < MAP_WIDTH && yp >= 0 && yp < MAP_HEIGHT) {
+                        map1[xp][yp] = 1;
+                    }
             }
         }
     }
@@ -155,6 +175,11 @@ double calculateAngle(double x1, double y1, double x2, double y2) {
     return angle;
 }
 
+//void vykreslenieBodov(){
+//    int bodyY [copyOfLaserData.numberOfScans];
+//    int bodyX [10000];
+//}
+
 void MainWindow::PID(){
     //   výpočet uhla a inicializovanie premennych
         double tick = 4;
@@ -171,10 +196,10 @@ void MainWindow::PID(){
         else if (engine.engineFire == true) {
             // sledujeme či sa nachádzame v tom rozsahu akom sme vypočítali aby sme sa mohli dostať do bodu kde chceme
             if ((dataSave.encoder_Angle < ciselko + 3) && (dataSave.encoder_Angle > ciselko - 3)) {
-                printf("rychlost s getera mimo zony: %d\n",robot.getTranslationSpeed());
+
                 // prva podmienka rovnaka ako pri zastavení len s vačšou vzdialenost kružnice od stredu && druha podmienka aby nám rychlosť nepreskočilo 500
                 if (engine.speedingUp<500 && pow(location.act_posX-koncovyX,2)/100 + pow(location.act_posY-koncovyY,2)/100 >= pow(0.1,2)){
-                    printf("zrychlujeme");                   
+
                     engine.speedingUp=engine.speedingUp+tick;
                     // uloženie poslednej rýchlosti do spomelania nech spomalujeme od tej rýchlosti kde sme skončili
                     if(engine.speedingUp<500){
@@ -185,7 +210,7 @@ void MainWindow::PID(){
                 // podmienka prvá rovnaká ako všetky s kruhom, ak je vzdialenosť od stredu manšia ako vzdialenosť od kružnice tak začneme spomalovať
                 //&& aby sme sa nedostali do záporných hodnôt tak spomalujeme len do 10
                 else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <= pow(0.1,2) && engine.speedingDown>50){
-                    printf("spomalovanie %f\n", (pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2)));
+
                     // uložená rýchlosť sa postupne stále zmänšuječím bližšie ideme
                     engine.speedingDown=engine.speedingDown - 50*(pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2));
                     if(engine.speedingDown>500){
@@ -216,7 +241,7 @@ void MainWindow::PID(){
                     engine.speedingUp=0;
                     engine.speedingDown=0;
                 }
-                printf("odtateto\n");
+
 
             }
 
@@ -232,7 +257,6 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     }
     locationPositon(robotdata);
     calculatingDistance(robotdata);
-
     if(datacounter%5)
     {
         ///tu zapisujeme tak aby sme to uvideli v GUI
@@ -240,8 +264,9 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
     }
     datacounter++;
 
+
  ///////////////zacinap pid//////////////////////
-    PID();
+//    PID();
  //////////////koncim pid////////////////////////
     return 0;
 }
@@ -279,6 +304,17 @@ void MainWindow::on_pushButton_9_clicked() //start button
     robot.robotStart();
 
 
+}
+
+void MainWindow::on_pushButton_10_clicked(){
+    std::ofstream outfile("map.txt");
+    for (int y = 0; y < MAP_HEIGHT; y++) {
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            outfile << (map1[x][y] == 0 ? " " : "#");
+        }
+        outfile << std::endl;
+    }
+    outfile.close();
 }
 
 void MainWindow::on_pushButton_2_clicked() //forward

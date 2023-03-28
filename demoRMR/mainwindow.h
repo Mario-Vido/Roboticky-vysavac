@@ -62,6 +62,14 @@ typedef struct c
     double Kp=0.02;
 }Engine;
 
+typedef struct mapovanie
+{
+    int Xp;
+    int Yp;
+
+
+}Mapovanie;
+
 namespace Ui {
 class MainWindow;
 }
@@ -95,6 +103,8 @@ public:
     void getPosition();
 
 private slots:
+    void on_pushButton_10_clicked();
+
     void on_pushButton_9_clicked();
 
     void on_pushButton_2_clicked();
