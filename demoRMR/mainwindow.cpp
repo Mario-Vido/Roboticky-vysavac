@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QPainter>
 #include <math.h>
+#include <fstream>
 ///Adko a Majko2 a Matko
 
 const double koncovyX = 3;
@@ -10,7 +11,8 @@ const int MAP_WIDTH = 600;
 const int MAP_HEIGHT = 500;
 int map1[MAP_WIDTH][MAP_HEIGHT] = {{0}};
 int p=0;
-const int radius = 100;
+const int SCAN_RANGE = 5;
+
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -72,27 +74,27 @@ void MainWindow::paintEvent(QPaintEvent *event)
             painter.setPen(pero);
             //teraz tu kreslime random udaje... vykreslite to co treba... t.j. data z lidaru
          //   std::cout<<copyOfLaserData.numberOfScans<<std::endl;
-            int min_xp = rect.width() - rect.width() / 2;
-            int min_yp = rect.height() - rect.height() / 2;
+//            int min_xp = rect.width() - rect.width() / 2;
+//            int min_yp = rect.height() - rect.height() / 2;
 
             for(int k=0;k<copyOfLaserData.numberOfScans/*360*/;k++)
             {
 
                 int dist=copyOfLaserData.Data[k].scanDistance/20; ///vzdialenost nahodne predelena 20 aby to nejako vyzeralo v okne.. zmen podla uvazenia
-                int xp=rect.width()-(rect.width()/2+dist*2*sin((360.0-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().x(); //prepocet do obrazovky
-                int yp=rect.height()-(rect.height()/2+dist*2*cos((360.0-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().y();//prepocet do obrazovky
+                int xp=rect.width()-(rect.width()/2+dist*2*sin((360.0-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().x(); //prepocet do obrazovky*/
+                int yp=rect.height()-(rect.height()/2+dist*2*cos((360.0-copyOfLaserData.Data[k].scanAngle)*3.14159/180.0))+rect.topLeft().y();//prepocet do obrazovky*/
                 if(rect.contains(xp,yp)){//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
                     painter.drawEllipse(QPoint(xp, yp),2,2);
                 }
 
-                if(p==0){
-                    xp -= min_xp;
-                    yp -= min_yp;
-                    p=1;
-                }
-                if (xp>= 0 && xp < MAP_WIDTH && yp >= 0 && yp < MAP_HEIGHT) {
-                        map1[xp][yp] = 1;
-                    }
+//                if(p==0){
+//                    xp -= min_xp;
+//                    yp -= min_yp;
+//                    p=1;
+//                }
+//                if (xp>= 0 && xp < MAP_WIDTH && yp >= 0 && yp < MAP_HEIGHT) {
+//                        map1[xp][yp] = 1;
+//                    }
             }
         }
     }
@@ -275,9 +277,30 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 /// vola sa ked dojdu nove data z lidaru
 int MainWindow::processThisLidar(LaserMeasurement laserData)
 {
+
     memcpy( &copyOfLaserData,&laserData,sizeof(LaserMeasurement));
     //tu mozete robit s datami z lidaru.. napriklad najst prekazky, zapisat do mapy. naplanovat ako sa prekazke vyhnut.
     // ale nic vypoctovo narocne - to iste vlakno ktore cita data z lidaru
+
+
+//    int min_xp = rect().width() - rect().width() / 2;
+//    int min_yp = rect().height() - rect().height() / 2;
+
+    for(int k=0;k<copyOfLaserData.numberOfScans;k++)
+    {
+        int dist=copyOfLaserData.Data[k].scanDistance/100; ///vzdialenost nahodne predelena 20 aby to nejako vyzeralo v okne.. zmen podla uvazeni
+        if(dist>=SCAN_RANGE){
+            int xp=location.act_posX*10+(cos(((360.0-laserData.Data[k].scanAngle)*3.14159/180.0)+dataSave.encoder_Angle*3.14159/180.0))*dist; //prepocet do obrazovky
+            int yp=location.act_posY*10+(sin(((360.0-laserData.Data[k].scanAngle)*3.14159/180.0)+dataSave.encoder_Angle*3.14159/180.0))*dist;//prepocet do obrazovky
+            printf("Suradnica x: %d a suradnica y: %d\n",xp,yp);
+            xp += 20;
+            yp += 20;
+            p=1;
+            if (xp>= 0 && xp < MAP_WIDTH && yp >= 0 && yp < MAP_HEIGHT) {
+                    map1[xp][yp] = 1;
+            }
+        }
+    }
     updateLaserPicture=1;
     update();//tento prikaz prinuti prekreslit obrazovku.. zavola sa paintEvent funkcia
 
@@ -315,6 +338,7 @@ void MainWindow::on_pushButton_10_clicked(){
         outfile << std::endl;
     }
     outfile.close();
+
 }
 
 void MainWindow::on_pushButton_2_clicked() //forward
