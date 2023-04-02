@@ -116,9 +116,11 @@ Engine engine;
 
 
 void inicialzation(TKobukiData robotdata){
+    printf("nacitalsommapukokotek2.\n");
     dataSave.encoder_Left_prev = robotdata.EncoderLeft;
     dataSave.encoder_Right_prev = robotdata.EncoderRight;
     dataSave.encoder_Angle_prev = robotdata.GyroAngle/100.0;
+    void loadMapp();
     dataSave.init = false;
 }
 
@@ -182,6 +184,18 @@ double calculateAngle(double x1, double y1, double x2, double y2) {
 //    int bodyX [10000];
 //}
 
+//
+
+void MainWindow::loadMap(){
+    printf("nacitalsommapukokotek2.\n");
+    return void();
+}
+
+void loadMapp(){
+    printf("nacitalsommapukokotek.\n");
+    return void();
+}
+//
 void MainWindow::PID(){
     //   výpočet uhla a inicializovanie premennych
         double tick = 4;
@@ -192,7 +206,7 @@ void MainWindow::PID(){
         if(((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100)  <pow(0.005,2)){ // rzchlost na yaklade vydialenosti k bodu
             engine.engineFire = false;
             robot.setTranslationSpeed(0);
-            printf("ciel");
+            //printf("ciel");
             engine.speedingDown=0;
         }
         else if (engine.engineFire == true) {
@@ -255,7 +269,9 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 {
     if(dataSave.init==true) // inicializujeme data
     {
+        loadMapp();
         inicialzation(robotdata);
+
     }
     locationPositon(robotdata);
     calculatingDistance(robotdata);
@@ -268,10 +284,72 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 
 
  ///////////////zacinap pid//////////////////////
-//    PID();
+    PID();
+//    return 0;
+//}
  //////////////koncim pid////////////////////////
+ ///
+ /// //////////zacinam4//////////////////////////
+ ///
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <string.h>
+
+//#define ROWS 10
+//#define COLS 5
+//#define BUFFER_SIZE 1024
+
+//    //
+
+//void MainWindow::loadmap(){
+//        FILE *fp;
+//        char buffer[BUFFER_SIZE];
+//        char *token;
+//        int row = 0, col = 0;
+//        int data[ROWS][COLS];
+//}
+//    //
+//int main() {
+//    FILE *fp;
+//    char buffer[BUFFER_SIZE];
+//    char *token;
+//    int row = 0, col = 0;
+//    int data[ROWS][COLS];
+
+//    fp = fopen("data.csv", "r");
+//    if (fp == NULL) {
+//        printf("Failed to open file.\n");
+//        exit(EXIT_FAILURE);
+//    }
+
+//    while (fgets(buffer, BUFFER_SIZE, fp) != NULL && row < ROWS) {
+//        token = strtok(buffer, ",");
+//        while (token != NULL && col < COLS) {
+//            data[row][col] = atoi(token);
+//            col++;
+//            token = strtok(NULL, ",");
+//        }
+//        col = 0;
+//        row++;
+//    }
+
+//    fclose(fp);
+
+//    // Print the contents of the 2D array
+//    for (int i = 0; i < ROWS; i++) {
+//        for (int j = 0; j < COLS; j++) {
+//            printf("%d ", data[i][j]);
+//        }
+//        printf("\n");
+//    }
+
     return 0;
 }
+
+ ///
+ /// /////////koncim4////////////////////////////
+//    return 0;
+//}
 
 ///toto je calback na data z lidaru, ktory ste podhodili robotu vo funkcii on_pushButton_9_clicked
 /// vola sa ked dojdu nove data z lidaru
@@ -292,7 +370,7 @@ int MainWindow::processThisLidar(LaserMeasurement laserData)
         if(dist>=SCAN_RANGE){
             int xp=location.act_posX*10+(cos(((360.0-laserData.Data[k].scanAngle)*3.14159/180.0)+dataSave.encoder_Angle*3.14159/180.0))*dist; //prepocet do obrazovky
             int yp=location.act_posY*10+(sin(((360.0-laserData.Data[k].scanAngle)*3.14159/180.0)+dataSave.encoder_Angle*3.14159/180.0))*dist;//prepocet do obrazovky
-            printf("Suradnica x: %d a suradnica y: %d\n",xp,yp);
+            //printf("Suradnica x: %d a suradnica y: %d\n",xp,yp);
             xp += 20;
             yp += 20;
             p=1;

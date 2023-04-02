@@ -90,6 +90,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void loadMap();
+
     int processThisLidar(LaserMeasurement laserData);
 
     int processThisRobot(TKobukiData robotdata);
@@ -97,6 +99,8 @@ public:
     void initData();
 
     void getData();
+
+
 
     void PID();
 
