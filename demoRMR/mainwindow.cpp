@@ -7,11 +7,11 @@
 
 const double koncovyX = 3;
 const double koncovyY = 1;
-const int MAP_WIDTH = 600;
-const int MAP_HEIGHT = 500;
-int map1[MAP_WIDTH][MAP_HEIGHT] = {{0}};
+const int mapWidth = 150;//600
+const int mapHeight = 100;//500
+int map1[mapWidth][mapHeight] = {{0}};
 int p=0;
-const int SCAN_RANGE = 5;
+const int scanRange = 5;
 
 
 
@@ -121,6 +121,7 @@ void inicialzation(TKobukiData robotdata){
     dataSave.encoder_Right_prev = robotdata.EncoderRight;
     dataSave.encoder_Angle_prev = robotdata.GyroAngle/100.0;
     void loadMapp();
+    printf("ahoj");
     dataSave.init = false;
 }
 
@@ -192,8 +193,7 @@ void MainWindow::loadMap(){
 }
 
 void loadMapp(){
-    printf("nacitalsommapukokotek.\n");
-    return void();
+    printf("nacitalsommapukokotek.\n");    
 }
 //
 void MainWindow::PID(){
@@ -269,7 +269,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 {
     if(dataSave.init==true) // inicializujeme data
     {
-        loadMapp();
+//        loadMapp();
         inicialzation(robotdata);
 
     }
@@ -284,7 +284,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 
 
  ///////////////zacinap pid//////////////////////
-    PID();
+//    PID();
 //    return 0;
 //}
  //////////////koncim pid////////////////////////
@@ -359,26 +359,26 @@ int MainWindow::processThisLidar(LaserMeasurement laserData)
     memcpy( &copyOfLaserData,&laserData,sizeof(LaserMeasurement));
     //tu mozete robit s datami z lidaru.. napriklad najst prekazky, zapisat do mapy. naplanovat ako sa prekazke vyhnut.
     // ale nic vypoctovo narocne - to iste vlakno ktore cita data z lidaru
-
-
-//    int min_xp = rect().width() - rect().width() / 2;
-//    int min_yp = rect().height() - rect().height() / 2;
+    if(robot.getTranslationSpeed()==0){
 
     for(int k=0;k<copyOfLaserData.numberOfScans;k++)
     {
+
         int dist=copyOfLaserData.Data[k].scanDistance/100; ///vzdialenost nahodne predelena 20 aby to nejako vyzeralo v okne.. zmen podla uvazeni
-        if(dist>=SCAN_RANGE){
+        if((dist>=scanRange && dist<=30 && dist<=6.4) || (dist>=scanRange && dist<=30 && dist>=7)){
             int xp=location.act_posX*10+(cos(((360.0-laserData.Data[k].scanAngle)*3.14159/180.0)+dataSave.encoder_Angle*3.14159/180.0))*dist; //prepocet do obrazovky
             int yp=location.act_posY*10+(sin(((360.0-laserData.Data[k].scanAngle)*3.14159/180.0)+dataSave.encoder_Angle*3.14159/180.0))*dist;//prepocet do obrazovky
             //printf("Suradnica x: %d a suradnica y: %d\n",xp,yp);
             xp += 20;
             yp += 20;
             p=1;
-            if (xp>= 0 && xp < MAP_WIDTH && yp >= 0 && yp < MAP_HEIGHT) {
+            if (xp>= 0 && xp < mapWidth && yp >= 0 && yp < mapHeight) {
                     map1[xp][yp] = 1;
             }
         }
     }
+    }
+    // 6,4 az po 7 nezapisovat a obmedzit vzdialenost na 3m, ked rotujem zak nezapuisovať
     updateLaserPicture=1;
     update();//tento prikaz prinuti prekreslit obrazovku.. zavola sa paintEvent funkcia
 
@@ -409,9 +409,9 @@ void MainWindow::on_pushButton_9_clicked() //start button
 
 void MainWindow::on_pushButton_10_clicked(){
     std::ofstream outfile("map.txt");
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        for (int x = 0; x < MAP_WIDTH; x++) {
-            outfile << (map1[x][y] == 0 ? " " : "#");
+    for (int y = 0; y < mapHeight; y++) {
+        for (int x = 0; x < mapWidth; x++) {
+            outfile << (map1[x][y] == 0 ? "0" : "1");
         }
         outfile << std::endl;
     }
@@ -437,14 +437,14 @@ void MainWindow::on_pushButton_3_clicked() //back
 void MainWindow::on_pushButton_6_clicked() //left
 {
     dataSave.stop = true;
-    robot.setRotationSpeed(3.14159/2);
+    robot.setRotationSpeed(3.14159/4);
 
 }
 
 void MainWindow::on_pushButton_5_clicked()//right
 {
     dataSave.stop = true;
-    robot.setRotationSpeed(-3.14159/2);
+    robot.setRotationSpeed(-3.14159/4);
 
 }
 
