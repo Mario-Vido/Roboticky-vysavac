@@ -20,7 +20,7 @@ const int startPointX = 5;
 const int startPointY = 11;
 int map1[MAP_WIDTH][MAP_HEIGHT] = {{0}};
 int p=0;
-const int SCAN_RANGE = 5;
+const int scanRange = 5;
 
 /////sklusajmodtadetoakkkt
 char str[] = "C:/Users/Aardwark/Documents/2sem/projekt/rmrNew/RMR/map.txt";
@@ -390,6 +390,8 @@ void inicialzation(TKobukiData robotdata){
     dataSave.encoder_Left_prev = robotdata.EncoderLeft;
     dataSave.encoder_Right_prev = robotdata.EncoderRight;
     dataSave.encoder_Angle_prev = robotdata.GyroAngle/100.0;
+    void loadMapp();
+    printf("ahoj");
     dataSave.init = false;
 }
 
@@ -457,6 +459,10 @@ double calculateAngle(double x1, double y1, double x2, double y2) {
 ///////////////////////////////konec4
 
 
+void loadMapp(){
+    printf("nacitalsommapukokotek.\n");    
+}
+//
 void MainWindow::PID(){
     //   výpočet uhla a inicializovanie premennych
         double tick = 4;
@@ -550,67 +556,7 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 {
     if(dataSave.init==true) // inicializujeme data
     {
-        mapovac(str,mapa.alfa);
-        mapa.alfa[18][5]='g';
-        for (int i = 0; i < 47; i++) {
-            for (int j = 0; j < 59; j++) {
-                printf("%.0d", mapa.alfa[i][j]-47);
-                printf(" ");
-                    if(mapa.alfa[i][j]-47<10){
-                        printf(" ");
-                }
-
-            }
-            printf("\n");
-        }
-
-        printf("\n");
-
-        float divisor = 10.0;
-
-
-        // Divide each element by the decimal number
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < 10; j++) {
-                endMatf[i][j] = endMat[i][j] / divisor;
-            }
-        }
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < 10; j++) {
-                printf("%.1f", endMatf[i][j]);
-                printf(" ");
-            }
-            printf("\n");
-        }
-
-
-        for (int i = 0; i < 10; i++) {
-            endMatf[0][i] = endMatf[0][i] - 0.4 ;
-        }
-
-        for (int i = 0; i < 10; i++) {
-            endMatf[1][i] = endMatf[1][i] - 0.4 ;
-        }
-
-
-        printf("\n");
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < 10; j++) {
-                printf("%.001f", endMatf[i][j]);
-                printf(" ");
-            }
-            printf("\n");
-        }
-
-//        for (int i = 0; i < 47; i++) {
-//            for (int j = 0; j < 59; j++) {
-//                if((mapa.alfa[i][j]!=48)&&(mapa.alfa[i][j]!=49)&&(mapa.alfa[i][j]!=10)&&(mapa.alfa[i][j]!=13)){
-//                        printf("mapa = %d, i = %d, j = %d  .\n",mapa.alfa[i][j],i,j);
-//                }
-//        }
-//    }
-
-
+//        loadMapp();
         inicialzation(robotdata);
     }
     locationPositon(robotdata);
@@ -625,6 +571,16 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 
  ///////////////zacinap pid//////////////////////
     PID();
+//    PID();
+//    return 0;
+//}
+ //////////////koncim pid////////////////////////
+ ///
+ /// //////////zacinam4//////////////////////////
+ ///
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <string.h>
 
     return 0;
 }
@@ -638,26 +594,26 @@ int MainWindow::processThisLidar(LaserMeasurement laserData)
     memcpy( &copyOfLaserData,&laserData,sizeof(LaserMeasurement));
     //tu mozete robit s datami z lidaru.. napriklad najst prekazky, zapisat do mapy. naplanovat ako sa prekazke vyhnut.
     // ale nic vypoctovo narocne - to iste vlakno ktore cita data z lidaru
-
-
-//    int min_xp = rect().width() - rect().width() / 2;
-//    int min_yp = rect().height() - rect().height() / 2;
+    if(robot.getTranslationSpeed()==0){
 
     for(int k=0;k<copyOfLaserData.numberOfScans;k++)
     {
+
         int dist=copyOfLaserData.Data[k].scanDistance/100; ///vzdialenost nahodne predelena 20 aby to nejako vyzeralo v okne.. zmen podla uvazeni
-        if(dist>=SCAN_RANGE){
+        if((dist>=scanRange && dist<=30 && dist<=6.4) || (dist>=scanRange && dist<=30 && dist>=7)){
             int xp=location.act_posX*10+(cos(((360.0-laserData.Data[k].scanAngle)*3.14159/180.0)+dataSave.encoder_Angle*3.14159/180.0))*dist; //prepocet do obrazovky
             int yp=location.act_posY*10+(sin(((360.0-laserData.Data[k].scanAngle)*3.14159/180.0)+dataSave.encoder_Angle*3.14159/180.0))*dist;//prepocet do obrazovky
             //printf("Suradnica x: %d a suradnica y: %d\n",xp,yp);
             xp += 20;
             yp += 20;
             p=1;
-            if (xp>= 0 && xp < MAP_WIDTH && yp >= 0 && yp < MAP_HEIGHT) {
+            if (xp>= 0 && xp < mapWidth && yp >= 0 && yp < mapHeight) {
                     map1[xp][yp] = 1;
             }
         }
     }
+    }
+    // 6,4 az po 7 nezapisovat a obmedzit vzdialenost na 3m, ked rotujem zak nezapuisovať
     updateLaserPicture=1;
     update();//tento prikaz prinuti prekreslit obrazovku.. zavola sa paintEvent funkcia
 
@@ -688,9 +644,9 @@ void MainWindow::on_pushButton_9_clicked() //start button
 
 void MainWindow::on_pushButton_10_clicked(){
     std::ofstream outfile("map.txt");
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        for (int x = 0; x < MAP_WIDTH; x++) {
-            outfile << (map1[x][y] == 0 ? " " : "#");
+    for (int y = 0; y < mapHeight; y++) {
+        for (int x = 0; x < mapWidth; x++) {
+            outfile << (map1[x][y] == 0 ? "0" : "1");
         }
         outfile << std::endl;
     }
@@ -716,14 +672,14 @@ void MainWindow::on_pushButton_3_clicked() //back
 void MainWindow::on_pushButton_6_clicked() //left
 {
     dataSave.stop = true;
-    robot.setRotationSpeed(3.14159/2);
+    robot.setRotationSpeed(3.14159/4);
 
 }
 
 void MainWindow::on_pushButton_5_clicked()//right
 {
     dataSave.stop = true;
-    robot.setRotationSpeed(-3.14159/2);
+    robot.setRotationSpeed(-3.14159/4);
 
 }
 
