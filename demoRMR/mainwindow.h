@@ -25,6 +25,8 @@ const double b = 0.23;
 
 
 
+
+
 typedef struct b
 {
     bool init = true;
@@ -51,6 +53,25 @@ typedef struct a
     double act_posY             = 0.0;
     double act_agl              = 0.0;
 }Location;
+
+typedef struct d
+{
+//    int** alfa = create2DArray(20, 200);
+//    //int** alfa[48][601];
+//    int** create2DArray(int rows, int cols) {
+//        int** arr = new int*[rows];
+//        for (int i = 0; i < rows; i++) {
+//            arr[i] = new int[cols];
+//            for (int j = 0; j < cols; j++) {
+//                arr[i][j] = i * j; // initialize array elements
+//            }
+//        }
+
+//        return arr;
+//    }
+    int alfa[47][59];
+    int cau = 3;
+}Mapa;
 
 typedef struct c
 {
@@ -90,7 +111,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void loadMap();
 
     int processThisLidar(LaserMeasurement laserData);
 

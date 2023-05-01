@@ -1,17 +1,286 @@
-#include "mainwindow.h"
+    #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QPainter>
 #include <math.h>
 #include <fstream>
+
+//#include "Other files"
 ///Adko a Majko2 a Matko
 
-const double koncovyX = 3;
-const double koncovyY = 1;
+double koncovyX = 0;
+double koncovyY = 0;
+int gg = 0;
+int endMat[2][20];
+float endMatf[2][20];
 const int MAP_WIDTH = 600;
 const int MAP_HEIGHT = 500;
+//const int endPointX = 35;
+//const int endPointY = 46;
+const int startPointX = 5;
+const int startPointY = 11;
 int map1[MAP_WIDTH][MAP_HEIGHT] = {{0}};
 int p=0;
 const int SCAN_RANGE = 5;
+
+/////sklusajmodtadetoakkkt
+char str[] = "C:/Users/Aardwark/Documents/2sem/projekt/rmrNew/RMR/map.txt";
+
+int** create2DArray(int rows, int cols) {
+    int** arr = new int*[rows];
+    for (int i = 0; i < rows; i++) {
+        arr[i] = new int[cols];
+        for (int j = 0; j < cols; j++) {
+            arr[i][j] = i * j; // initialize array elements
+        }
+    }
+    return arr;
+}
+
+int mapovac(char *filename,int mapa[47][59]) {
+//    struct Map map;
+    FILE *fp;
+    int ROWS = 47;
+    int COLS = 59;
+
+    // Open the file for reading
+    fp = fopen(filename, "rb");
+    if (fp == NULL) {
+        printf("Error: Could not open file.\n");
+        exit(1);
+    }
+
+    // Read the file into the map structure
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+            fscanf(fp,"%c",&mapa[i][j]);
+        }
+    }
+
+    // Close the file
+    fclose(fp);
+
+    for (int y = 0; y < ROWS; y++) {
+        for (int x = 0; x < COLS; x++) {
+            if (mapa[y][x] == 48) {
+                // Set the adjacent cells to walls
+                if(mapa[y-1][x]==49){
+                    mapa[y][x] = 55;
+                }
+                if(mapa[y+1][x]==49){
+                    mapa[y][x] = 55;
+                }
+                if(mapa[y][x-1]==49){
+                    mapa[y][x] = 55;
+                }
+                if(mapa[y][x+1]==49){
+                    mapa[y][x] = 55;
+                }
+
+                if(mapa[y-2][x]==49){
+                    mapa[y][x] = 55;
+                }
+                if(mapa[y+2][x]==49){
+                    mapa[y][x] = 55;
+                }
+                if(mapa[y][x-2]==49){
+                    mapa[y][x] = 55;
+                }
+                if(mapa[y][x+2]==49){
+                    mapa[y][x] = 55;
+                }
+           }
+        }
+    }
+    for (int y = 0; y < ROWS; y++) {
+        for (int x = 0; x < COLS; x++) {
+           if (mapa[y][x] == 55) {
+                mapa[y][x] = 49;
+           }
+        }
+    }
+
+
+    printf("\ntotojestart%.0d\n", mapa[startPointX][startPointY]-47);
+    //    SOLVED      pointer musi byt 3(vsetky trojky) potom vsetky stvorky (teraz mi vypise cely riadok) cize dat premenu ktora incrementuje a inkrementacne cislo zapise
+    int f = 0;
+    char ink = 50;
+    while ((mapa[startPointX-1][startPointY] == 48)&&(mapa[startPointX+1][startPointY] == 48)&&(mapa[startPointX][startPointY-1] == 48)&&(mapa[startPointX][startPointY+1] == 48)&&(f < 5000)) {
+        printf("  %d  ,",f);
+
+        for (int y = 0; y < ROWS; y++) {
+           for (int x = 0; x < COLS; x++) {
+                if(mapa[y][x] != 127){
+
+
+                    if ((mapa[y][x] == ink)&&(mapa[y][x] != 49)&&(mapa[y][x] != 48)) {
+                        printf(" %d ",ink);
+                        if(mapa[y-1][x]==48){
+                            mapa[y-1][x] = ink+1;
+                        }
+                        if(mapa[y+1][x]==48){
+                            mapa[y+1][x] = ink+1;
+                        }
+                        if(mapa[y][x-1]==48){
+                            mapa[y][x-1] = ink+1;
+                        }
+                        if(mapa[y][x+1]==48){
+                            mapa[y][x+1] = ink+1;
+                        }
+                    }
+                    if (mapa[y][x] == 119) {
+                        ink = 51;
+                        mapa[y][x] = 52;
+
+                    }
+              //  ink++;
+            }
+           }
+        }
+        ink++;
+        f++;
+    }
+
+
+    //                    if (mapa[y][x] == ink) {
+    //                    if((mapa[y-1][x]!=48)&&(mapa[y-1][x]!=49)&&(mapa[y-1][x]!=126)){
+    //                            mapa[y][x] = mapa[y-1][x]+1;
+    //                    }
+    //                    if((mapa[y+1][x]!=48)&&(mapa[y+1][x]!=49)&&(mapa[y+1][x]!=126)){
+    //                            mapa[y][x] = mapa[y+1][x]+1;
+    //                    }
+    //                    if((mapa[y][x-1]!=48)&&(mapa[y][x-1]!=49)&&(mapa[y][x-1]!=126)){
+    //                            mapa[y][x] = mapa[y][x-1]+1;
+    //                    }
+    //                    if((mapa[y][x+1]!=48)&&(mapa[y][x+1]!=49)&&(mapa[y][x+1]!=126)){
+    //                            mapa[y][x] = mapa[y][x+1]+1;
+    //                    }
+    //                    if (ink == 119) {
+    //                       ink = 52;
+    //                    }
+    //                }
+
+    int y=11;
+    int x=5;
+    int k=0;
+    int bufferX = 5;
+    int bufferY = 11;
+    int h = 0;
+    int d = 0;
+    int p = 0;
+    int l = 0;
+    int n = 0;
+//  SOLVED  tusapozret
+    if(mapa[y-1][x] != 48){
+        y=y-1;
+    }
+    else if(mapa[y+1][x] != 48){
+        y=y+1;
+    }
+    else if(mapa[y][x-1] != 48){
+        x=x-1;
+    }
+    else if(mapa[y][x+1] != 48){
+        x=x+1;
+    }
+
+    //char minpred = 'd';
+//    mapa[y][x]='t';
+    printf("\nmalobybyt t %c\n",mapa[y][x]);
+    endMat[0][0] = x;
+    endMat[1][0] = y;
+    while((mapa[y][x]-1==mapa[y-1][x])||(mapa[y][x]-1==mapa[y+1][x])||(mapa[y][x]-1==mapa[y][x-1])||(mapa[y][x]-1==mapa[y][x+1])){
+        bufferX = x;
+        bufferY = y;
+        h = 0;
+        d = 0;
+        p = 0;
+        l = 0;
+        n = 0;
+
+
+        while(mapa[y][x]-1==mapa[y-1][x]){
+           l++;
+           y=y-1;
+           if(mapa[y][x]==52){
+            mapa[y][x]=119;
+           }
+        }
+        x = bufferX;
+        y = bufferY;
+
+        while(mapa[y][x]-1==mapa[y+1][x]){
+           p++;
+           y=y+1;
+           if(mapa[y][x]==52){
+            mapa[y][x]=119;
+           }
+        }
+        x = bufferX;
+        y = bufferY;
+
+        while(mapa[y][x]-1==mapa[y][x-1]){
+           h++;
+           x=x-1;
+           if(mapa[y][x]==52){
+            mapa[y][x]=119;
+           }
+        }
+        x = bufferX;
+        y = bufferY;
+
+        while(mapa[y][x]-1==mapa[y][x+1]){
+           d++;
+           x=x+1;
+           if(mapa[y][x]==52){
+            mapa[y][x]=119;
+           }
+        }
+        x = bufferX;
+        y = bufferY;
+
+        printf("\l = %d p = %d h = %d d = %d\n",l, p, h, d);
+
+
+        n = l;
+        if(p>n){n=p;}
+        if(h>n){n=h;}
+        if(d>n){n=d;}
+
+        if(n==l){
+           y=y-l;
+
+        }
+        if(n==p){
+           y=y+p;
+
+        }
+        if(n==h){
+           x=x-h;
+
+        }
+        if(n==d){
+           x=x+d;
+
+        }
+
+        endMat[0][k] = x;
+        endMat[1][k] = y;
+
+        mapa[y][x-3]='u';
+        printf("\malo by byt u %c\n",mapa[y][x]);
+
+        k++;
+        printf("\k = %d\n",k);
+        if(k>500){
+           break;
+        }
+    }
+    printf("\nmapayx%c\n",mapa[y][x]);
+    printf("\n-1mapayx%c\n",mapa[y][x]-1);
+
+
+    return 0;
+}
 
 
 
@@ -113,14 +382,14 @@ void  MainWindow::setUiValues(double robotX,double robotY,double robotFi)
 Data dataSave; //ukladame data
 Location location;
 Engine engine;
+Mapa mapa;
 
 
 void inicialzation(TKobukiData robotdata){
-    printf("nacitalsommapukokotek2.\n");
+//    void map_loader("priestor.txt");
     dataSave.encoder_Left_prev = robotdata.EncoderLeft;
     dataSave.encoder_Right_prev = robotdata.EncoderRight;
     dataSave.encoder_Angle_prev = robotdata.GyroAngle/100.0;
-    void loadMapp();
     dataSave.init = false;
 }
 
@@ -184,18 +453,10 @@ double calculateAngle(double x1, double y1, double x2, double y2) {
 //    int bodyX [10000];
 //}
 
-//
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////4444444444444//////////
+///////////////////////////////konec4
 
-void MainWindow::loadMap(){
-    printf("nacitalsommapukokotek2.\n");
-    return void();
-}
 
-void loadMapp(){
-    printf("nacitalsommapukokotek.\n");
-    return void();
-}
-//
 void MainWindow::PID(){
     //   výpočet uhla a inicializovanie premennych
         double tick = 4;
@@ -204,12 +465,32 @@ void MainWindow::PID(){
 //        printf("pozadovany uhol %f\n",ciselko);
         //okolie bodu kde sa chceme dostať, počítame obvod kruhu a následne vzdialenosť od stredu kruhu, ak vypočítana vzdialenosť od stredu je menšia ako vzdialenosť kružnice od kruhu tak zastavíme
         if(((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100)  <pow(0.005,2)){ // rzchlost na yaklade vydialenosti k bodu
-            engine.engineFire = false;
+//            engine.engineFire = false;
             robot.setTranslationSpeed(0);
             //printf("ciel");
             engine.speedingDown=0;
+            printf("pred podmienkou %d",gg);
+            printf("\ngg+1 x=%f y%f \n",endMatf[0][gg+1], endMatf[1][gg+1]);
+            if(((fabs(endMatf[0][gg+1] +0.4) <= 0.01) )&&((fabs(endMatf[1][gg+1] +0.4) <= 0.01))){
+            engine.engineFire = false;
+            robot.setTranslationSpeed(0);
+            printf("zbehol som");
+            cout<<("zbehol som")<<endl;
+            }
+            else{
+            printf("somv elsefit %d",gg);
+            cout<<("somv elsefit %d",gg)<<endl;
+            gg++;
+            koncovyX = endMatf[0][gg];
+            koncovyY = endMatf[1][gg];
+            }
+
+
+
         }
         else if (engine.engineFire == true) {
+            std::cout<<"zelana  "<<koncovyX<<" "<<koncovyY<<" "<<gg<<std::endl;
+
             // sledujeme či sa nachádzame v tom rozsahu akom sme vypočítali aby sme sa mohli dostať do bodu kde chceme
             if ((dataSave.encoder_Angle < ciselko + 3) && (dataSave.encoder_Angle > ciselko - 3)) {
 
@@ -225,24 +506,24 @@ void MainWindow::PID(){
                     }
                 // podmienka prvá rovnaká ako všetky s kruhom, ak je vzdialenosť od stredu manšia ako vzdialenosť od kružnice tak začneme spomalovať
                 //&& aby sme sa nedostali do záporných hodnôt tak spomalujeme len do 10
-                else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <= pow(0.1,2) && engine.speedingDown>50){
+                else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <= pow(0.1,2) && engine.speedingDown>150){
 
                     // uložená rýchlosť sa postupne stále zmänšuječím bližšie ideme
                     engine.speedingDown=engine.speedingDown - 50*(pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2));
                     if(engine.speedingDown>500){
                         engine.speedingDown=500;
                     }
-                    else if ((engine.speedingDown - 25*(pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2)))<50){
-                        engine.speedingDown=50;
+                    else if ((engine.speedingDown - 25*(pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2)))<150){
+                        engine.speedingDown=150;
                     }
                     else{
                         robot.setTranslationSpeed(engine.speedingDown);
                     }
 
                 }
-                else if(engine.speedingDown<=50 && engine.speedingDown>=0){
-                    engine.speedingDown=50;
-                    robot.setTranslationSpeed(50);
+                else if(engine.speedingDown<=150 && engine.speedingDown>=0){
+                    engine.speedingDown=150;
+                    robot.setTranslationSpeed(150);
                 }
             }
 
@@ -269,9 +550,68 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 {
     if(dataSave.init==true) // inicializujeme data
     {
-        loadMapp();
-        inicialzation(robotdata);
+        mapovac(str,mapa.alfa);
+        mapa.alfa[18][5]='g';
+        for (int i = 0; i < 47; i++) {
+            for (int j = 0; j < 59; j++) {
+                printf("%.0d", mapa.alfa[i][j]-47);
+                printf(" ");
+                    if(mapa.alfa[i][j]-47<10){
+                        printf(" ");
+                }
 
+            }
+            printf("\n");
+        }
+
+        printf("\n");
+
+        float divisor = 10.0;
+
+
+        // Divide each element by the decimal number
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 10; j++) {
+                endMatf[i][j] = endMat[i][j] / divisor;
+            }
+        }
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 10; j++) {
+                printf("%.1f", endMatf[i][j]);
+                printf(" ");
+            }
+            printf("\n");
+        }
+
+
+        for (int i = 0; i < 10; i++) {
+            endMatf[0][i] = endMatf[0][i] - 0.4 ;
+        }
+
+        for (int i = 0; i < 10; i++) {
+            endMatf[1][i] = endMatf[1][i] - 0.4 ;
+        }
+
+
+        printf("\n");
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 10; j++) {
+                printf("%.001f", endMatf[i][j]);
+                printf(" ");
+            }
+            printf("\n");
+        }
+
+//        for (int i = 0; i < 47; i++) {
+//            for (int j = 0; j < 59; j++) {
+//                if((mapa.alfa[i][j]!=48)&&(mapa.alfa[i][j]!=49)&&(mapa.alfa[i][j]!=10)&&(mapa.alfa[i][j]!=13)){
+//                        printf("mapa = %d, i = %d, j = %d  .\n",mapa.alfa[i][j],i,j);
+//                }
+//        }
+//    }
+
+
+        inicialzation(robotdata);
     }
     locationPositon(robotdata);
     calculatingDistance(robotdata);
@@ -285,71 +625,10 @@ int MainWindow::processThisRobot(TKobukiData robotdata)
 
  ///////////////zacinap pid//////////////////////
     PID();
-//    return 0;
-//}
- //////////////koncim pid////////////////////////
- ///
- /// //////////zacinam4//////////////////////////
- ///
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
-
-//#define ROWS 10
-//#define COLS 5
-//#define BUFFER_SIZE 1024
-
-//    //
-
-//void MainWindow::loadmap(){
-//        FILE *fp;
-//        char buffer[BUFFER_SIZE];
-//        char *token;
-//        int row = 0, col = 0;
-//        int data[ROWS][COLS];
-//}
-//    //
-//int main() {
-//    FILE *fp;
-//    char buffer[BUFFER_SIZE];
-//    char *token;
-//    int row = 0, col = 0;
-//    int data[ROWS][COLS];
-
-//    fp = fopen("data.csv", "r");
-//    if (fp == NULL) {
-//        printf("Failed to open file.\n");
-//        exit(EXIT_FAILURE);
-//    }
-
-//    while (fgets(buffer, BUFFER_SIZE, fp) != NULL && row < ROWS) {
-//        token = strtok(buffer, ",");
-//        while (token != NULL && col < COLS) {
-//            data[row][col] = atoi(token);
-//            col++;
-//            token = strtok(NULL, ",");
-//        }
-//        col = 0;
-//        row++;
-//    }
-
-//    fclose(fp);
-
-//    // Print the contents of the 2D array
-//    for (int i = 0; i < ROWS; i++) {
-//        for (int j = 0; j < COLS; j++) {
-//            printf("%d ", data[i][j]);
-//        }
-//        printf("\n");
-//    }
 
     return 0;
 }
 
- ///
- /// /////////koncim4////////////////////////////
-//    return 0;
-//}
 
 ///toto je calback na data z lidaru, ktory ste podhodili robotu vo funkcii on_pushButton_9_clicked
 /// vola sa ked dojdu nove data z lidaru
