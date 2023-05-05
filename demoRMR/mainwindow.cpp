@@ -5,13 +5,15 @@
 #include <fstream>
 
 //#include "Other files"
-///Adko a Majko2 a Matko
+///Adko a Majko2
+
 
 double koncovyX = 0;
-double koncovyY = 0;
+double koncovyY = 2.5;
 int gg = 0;
 int endMat[2][20];
 float endMatf[2][20];
+const double tick_meter = 0.000085292090497737556558;
 const int MAP_WIDTH = 600;
 const int MAP_HEIGHT = 500;
 //const int endPointX = 35;
@@ -21,8 +23,10 @@ const int startPointY = 11;
 int map1[MAP_WIDTH][MAP_HEIGHT] = {{0}};
 int p=0;
 const int scanRange = 5;
+const int mapWidth = 150;
+const int mapHeight = 100;
 
-/////sklusajmodtadetoakkkt
+/////sklusajmodtadetoa
 char str[] = "C:/Users/Aardwark/Documents/2sem/projekt/rmrNew/RMR/map.txt";
 
 int** create2DArray(int rows, int cols) {
@@ -30,33 +34,33 @@ int** create2DArray(int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         arr[i] = new int[cols];
         for (int j = 0; j < cols; j++) {
-            arr[i][j] = i * j; // initialize array elements
+            arr[i][j] = i * j;
         }
     }
     return arr;
 }
 
 int mapovac(char *filename,int mapa[47][59]) {
-//    struct Map map;
+
     FILE *fp;
     int ROWS = 47;
     int COLS = 59;
 
-    // Open the file for reading
+
     fp = fopen(filename, "rb");
     if (fp == NULL) {
         printf("Error: Could not open file.\n");
         exit(1);
     }
 
-    // Read the file into the map structure
+
     for (int i = 0; i < ROWS; i++) {
         for (int j = 0; j < COLS; j++) {
             fscanf(fp,"%c",&mapa[i][j]);
         }
     }
 
-    // Close the file
+
     fclose(fp);
 
     for (int y = 0; y < ROWS; y++) {
@@ -140,25 +144,6 @@ int mapovac(char *filename,int mapa[47][59]) {
         f++;
     }
 
-
-    //                    if (mapa[y][x] == ink) {
-    //                    if((mapa[y-1][x]!=48)&&(mapa[y-1][x]!=49)&&(mapa[y-1][x]!=126)){
-    //                            mapa[y][x] = mapa[y-1][x]+1;
-    //                    }
-    //                    if((mapa[y+1][x]!=48)&&(mapa[y+1][x]!=49)&&(mapa[y+1][x]!=126)){
-    //                            mapa[y][x] = mapa[y+1][x]+1;
-    //                    }
-    //                    if((mapa[y][x-1]!=48)&&(mapa[y][x-1]!=49)&&(mapa[y][x-1]!=126)){
-    //                            mapa[y][x] = mapa[y][x-1]+1;
-    //                    }
-    //                    if((mapa[y][x+1]!=48)&&(mapa[y][x+1]!=49)&&(mapa[y][x+1]!=126)){
-    //                            mapa[y][x] = mapa[y][x+1]+1;
-    //                    }
-    //                    if (ink == 119) {
-    //                       ink = 52;
-    //                    }
-    //                }
-
     int y=11;
     int x=5;
     int k=0;
@@ -182,9 +167,6 @@ int mapovac(char *filename,int mapa[47][59]) {
     else if(mapa[y][x+1] != 48){
         x=x+1;
     }
-
-    //char minpred = 'd';
-//    mapa[y][x]='t';
     printf("\nmalobybyt t %c\n",mapa[y][x]);
     endMat[0][0] = x;
     endMat[1][0] = y;
@@ -312,7 +294,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-Mapovanie mapovanie;
 
 void MainWindow::paintEvent(QPaintEvent *event)
 {
@@ -341,10 +322,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
             updateLaserPicture=0;
 
             painter.setPen(pero);
-            //teraz tu kreslime random udaje... vykreslite to co treba... t.j. data z lidaru
-         //   std::cout<<copyOfLaserData.numberOfScans<<std::endl;
-//            int min_xp = rect.width() - rect.width() / 2;
-//            int min_yp = rect.height() - rect.height() / 2;
+
 
             for(int k=0;k<copyOfLaserData.numberOfScans/*360*/;k++)
             {
@@ -355,15 +333,6 @@ void MainWindow::paintEvent(QPaintEvent *event)
                 if(rect.contains(xp,yp)){//ak je bod vo vnutri nasho obdlznika tak iba vtedy budem chciet kreslit
                     painter.drawEllipse(QPoint(xp, yp),2,2);
                 }
-
-//                if(p==0){
-//                    xp -= min_xp;
-//                    yp -= min_yp;
-//                    p=1;
-//                }
-//                if (xp>= 0 && xp < MAP_WIDTH && yp >= 0 && yp < MAP_HEIGHT) {
-//                        map1[xp][yp] = 1;
-//                    }
             }
         }
     }
@@ -379,67 +348,87 @@ void  MainWindow::setUiValues(double robotX,double robotY,double robotFi)
      ui->lineEdit_4->setText(QString::number(robotFi));
 }
 
-Data dataSave; //ukladame data
-Location location;
-Engine engine;
-Mapa mapa;
 
+double Vzdialenost_Left_w;
+double Vzdialenost_Right_w;
+double Vzdialenost;
+
+double act_posX= 0.0;
+double act_posY= 0.0;
+double act_agl= 0.0;
+bool engineFire = true;
+bool helper = true;
+double pointAToPoinB;
+int speedingUp = 0;
+int speedingDown = 500;
+double Kp=0.02;
+bool init = true;
+double encoder_Left_prev;
+double encoder_Right_prev;
+double encoder_Angle_prev;
+
+double encoder_Left;
+double encoder_Right;
+double encoder_Angle;
+
+double diff_Left;
+double diff_Right;
+bool stop;
 
 void inicialzation(TKobukiData robotdata){
-//    void map_loader("priestor.txt");
-    dataSave.encoder_Left_prev = robotdata.EncoderLeft;
-    dataSave.encoder_Right_prev = robotdata.EncoderRight;
-    dataSave.encoder_Angle_prev = robotdata.GyroAngle/100.0;
+    encoder_Left_prev = robotdata.EncoderLeft;
+    encoder_Right_prev = robotdata.EncoderRight;
+    encoder_Angle_prev = robotdata.GyroAngle/100.0;
     void loadMapp();
     printf("ahoj");
-    dataSave.init = false;
+    init = false;
 }
 
 void locationPositon(TKobukiData robotdata){
-    dataSave.encoder_Left = robotdata.EncoderLeft;
-    dataSave.encoder_Right = robotdata.EncoderRight;
+    encoder_Left = robotdata.EncoderLeft;
+    encoder_Right = robotdata.EncoderRight;
     //pretečenie riešime
-    if(dataSave.encoder_Left_prev - dataSave.encoder_Left > 60000)
+    if(encoder_Left_prev - encoder_Left > 60000)
     {
-        dataSave.encoder_Left_prev = -(65535 - dataSave.encoder_Left_prev);
+        encoder_Left_prev = -(65535 - encoder_Left_prev);
     }
-    else if(dataSave.encoder_Left_prev - dataSave.encoder_Left < -60000)
+    else if(encoder_Left_prev - encoder_Left < -60000)
     {
-         dataSave.encoder_Left_prev = 65535 + dataSave.encoder_Left_prev;
+         encoder_Left_prev = 65535 + encoder_Left_prev;
     }
-    if(dataSave.encoder_Right_prev - dataSave.encoder_Right > 60000)
+    if(encoder_Right_prev - encoder_Right > 60000)
     {
-        dataSave.encoder_Right_prev = -(65535 - dataSave.encoder_Right_prev);
+        encoder_Right_prev = -(65535 - encoder_Right_prev);
     }
-    else if(dataSave.encoder_Right_prev - dataSave.encoder_Right < -60000)
+    else if(encoder_Right_prev - encoder_Right < -60000)
     {
-         dataSave.encoder_Right_prev = 65535 + dataSave.encoder_Right_prev;
+         encoder_Right_prev = 65535 + encoder_Right_prev;
     }
 }
 
-void calculatingDistance(TKobukiData robotdata){
+void calculatingVzdialenost(TKobukiData robotdata){
     //počítame a riešime uhol
-    dataSave.encoder_Angle = robotdata.GyroAngle/100.0 - dataSave.encoder_Angle_prev;
-    if(dataSave.encoder_Angle >180.0)
+    encoder_Angle = robotdata.GyroAngle/100.0 - encoder_Angle_prev;
+    if(encoder_Angle >180.0)
     {
-        dataSave.encoder_Angle = dataSave.encoder_Angle - 360.0;
+        encoder_Angle = encoder_Angle - 360.0;
     }
-    else if(dataSave.encoder_Angle<-180.0)
+    else if(encoder_Angle<-180.0)
     {
-        dataSave.encoder_Angle = dataSave.encoder_Angle + 360.0;
+        encoder_Angle = encoder_Angle + 360.0;
     }
     // počítanie vzdialenosti
-    location.distance_Left_w = (tick_meter * (dataSave.encoder_Left - dataSave.encoder_Left_prev));
-    location.distance_Right_w = tick_meter * (dataSave.encoder_Right - dataSave.encoder_Right_prev);
-    location.distance = (location.distance_Left_w + location.distance_Right_w)/2;
+    Vzdialenost_Left_w = (tick_meter * (encoder_Left - encoder_Left_prev));
+    Vzdialenost_Right_w = tick_meter * (encoder_Right - encoder_Right_prev);
+    Vzdialenost = (Vzdialenost_Left_w + Vzdialenost_Right_w)/2;
 
-    dataSave.encoder_Left_prev = dataSave.encoder_Left;
-    dataSave.encoder_Right_prev = dataSave.encoder_Right;
+    encoder_Left_prev = encoder_Left;
+    encoder_Right_prev = encoder_Right;
 
     //vypočítane pozície x,y a uhla
-    location.act_posX = location.act_posX + (location.distance * cos(dataSave.encoder_Angle*PI/180.0));
-    location.act_posY = location.act_posY + (location.distance * sin(dataSave.encoder_Angle*PI/180.0));
-    engine.pointAToPoinB = sqrt(pow(koncovyX,2)+pow(koncovyY,2))/100;
+    act_posX = act_posX + (Vzdialenost * cos(encoder_Angle*PI/180.0));
+    act_posY = act_posY + (Vzdialenost * sin(encoder_Angle*PI/180.0));
+    pointAToPoinB = sqrt(pow(koncovyX,2)+pow(koncovyY,2))/100;
 }
 
 /////////////////////////
@@ -450,35 +439,27 @@ double calculateAngle(double x1, double y1, double x2, double y2) {
     return angle;
 }
 
-//void vykreslenieBodov(){
-//    int bodyY [copyOfLaserData.numberOfScans];
-//    int bodyX [10000];
-//}
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////4444444444444//////////
-///////////////////////////////konec4
 
 
 void loadMapp(){
-    printf("nacitalsommapukokotek.\n");    
+    printf("nacitalsommapu.\n");
 }
 //
 void MainWindow::PID(){
     //   výpočet uhla a inicializovanie premennych
         double tick = 4;
         double ciselko;
-        ciselko = calculateAngle(location.act_posX, location.act_posY, koncovyX, koncovyY);
-//        printf("pozadovany uhol %f\n",ciselko);
+        ciselko = calculateAngle(act_posX, act_posY, koncovyX, koncovyY);
         //okolie bodu kde sa chceme dostať, počítame obvod kruhu a následne vzdialenosť od stredu kruhu, ak vypočítana vzdialenosť od stredu je menšia ako vzdialenosť kružnice od kruhu tak zastavíme
-        if(((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100)  <pow(0.005,2)){ // rzchlost na yaklade vydialenosti k bodu
-//            engine.engineFire = false;
+        if(((pow(act_posX-koncovyX,2) + pow(act_posY-koncovyY,2))/100)  <pow(0.005,2)){ // rzchlost na yaklade vydialenosti k bodu
             robot.setTranslationSpeed(0);
             //printf("ciel");
-            engine.speedingDown=0;
+            speedingDown=0;
             printf("pred podmienkou %d",gg);
             printf("\ngg+1 x=%f y%f \n",endMatf[0][gg+1], endMatf[1][gg+1]);
             if(((fabs(endMatf[0][gg+1] +0.4) <= 0.01) )&&((fabs(endMatf[1][gg+1] +0.4) <= 0.01))){
-            engine.engineFire = false;
+            engineFire = false;
             robot.setTranslationSpeed(0);
             printf("zbehol som");
             cout<<("zbehol som")<<endl;
@@ -494,55 +475,55 @@ void MainWindow::PID(){
 
 
         }
-        else if (engine.engineFire == true) {
+        else if (engineFire == true) {
             std::cout<<"zelana  "<<koncovyX<<" "<<koncovyY<<" "<<gg<<std::endl;
 
             // sledujeme či sa nachádzame v tom rozsahu akom sme vypočítali aby sme sa mohli dostať do bodu kde chceme
-            if ((dataSave.encoder_Angle < ciselko + 3) && (dataSave.encoder_Angle > ciselko - 3)) {
+            if ((encoder_Angle < ciselko + 3) && (encoder_Angle > ciselko - 3)) {
 
                 // prva podmienka rovnaka ako pri zastavení len s vačšou vzdialenost kružnice od stredu && druha podmienka aby nám rychlosť nepreskočilo 500
-                if (engine.speedingUp<500 && pow(location.act_posX-koncovyX,2)/100 + pow(location.act_posY-koncovyY,2)/100 >= pow(0.1,2)){
+                if (speedingUp<500 && pow(act_posX-koncovyX,2)/100 + pow(act_posY-koncovyY,2)/100 >= pow(0.1,2)){
 
-                    engine.speedingUp=engine.speedingUp+tick;
+                    speedingUp=speedingUp+tick;
                     // uloženie poslednej rýchlosti do spomelania nech spomalujeme od tej rýchlosti kde sme skončili
-                    if(engine.speedingUp<500){
-                    robot.setTranslationSpeed(engine.speedingUp);
-                    engine.speedingDown=engine.speedingUp/*100*(pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2))*/;
+                    if(speedingUp<500){
+                    robot.setTranslationSpeed(speedingUp);
+                    speedingDown=speedingUp/*100*(pow(koncovyX-act_posX,2) + pow(koncovyY-act_posY,2))*/;
                     }
                     }
                 // podmienka prvá rovnaká ako všetky s kruhom, ak je vzdialenosť od stredu manšia ako vzdialenosť od kružnice tak začneme spomalovať
                 //&& aby sme sa nedostali do záporných hodnôt tak spomalujeme len do 10
-                else if((pow(location.act_posX-koncovyX,2) + pow(location.act_posY-koncovyY,2))/100 <= pow(0.1,2) && engine.speedingDown>150){
+                else if((pow(act_posX-koncovyX,2) + pow(act_posY-koncovyY,2))/100 <= pow(0.1,2) && speedingDown>150){
 
                     // uložená rýchlosť sa postupne stále zmänšuječím bližšie ideme
-                    engine.speedingDown=engine.speedingDown - 50*(pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2));
-                    if(engine.speedingDown>500){
-                        engine.speedingDown=500;
+                    speedingDown=speedingDown - 50*(pow(koncovyX-act_posX,2) + pow(koncovyY-act_posY,2));
+                    if(speedingDown>500){
+                        speedingDown=500;
                     }
-                    else if ((engine.speedingDown - 25*(pow(koncovyX-location.act_posX,2) + pow(koncovyY-location.act_posY,2)))<150){
-                        engine.speedingDown=150;
+                    else if ((speedingDown - 25*(pow(koncovyX-act_posX,2) + pow(koncovyY-act_posY,2)))<150){
+                        speedingDown=150;
                     }
                     else{
-                        robot.setTranslationSpeed(engine.speedingDown);
+                        robot.setTranslationSpeed(speedingDown);
                     }
 
                 }
-                else if(engine.speedingDown<=150 && engine.speedingDown>=0){
-                    engine.speedingDown=150;
+                else if(speedingDown<=150 && speedingDown>=0){
+                    speedingDown=150;
                     robot.setTranslationSpeed(150);
                 }
             }
 
-            else if ((dataSave.encoder_Angle > ciselko + 7) || (dataSave.encoder_Angle < ciselko - 7)) {
-                if(dataSave.encoder_Angle>ciselko+7){
-                   robot.setRotationSpeed((engine.Kp*(ciselko-dataSave.encoder_Angle)));
-                   engine.speedingUp=0;
-                   engine.speedingDown=0;
+            else if ((encoder_Angle > ciselko + 7) || (encoder_Angle < ciselko - 7)) {
+                if(encoder_Angle>ciselko+7){
+                   robot.setRotationSpeed((Kp*(ciselko-encoder_Angle)));
+                   speedingUp=0;
+                   speedingDown=0;
                 }
-                else if((dataSave.encoder_Angle < ciselko - 7)){
-                    robot.setRotationSpeed(engine.Kp*(ciselko-dataSave.encoder_Angle));
-                    engine.speedingUp=0;
-                    engine.speedingDown=0;
+                else if((encoder_Angle < ciselko - 7)){
+                    robot.setRotationSpeed(Kp*(ciselko-encoder_Angle));
+                    speedingUp=0;
+                    speedingDown=0;
                 }
 
 
@@ -554,33 +535,22 @@ void MainWindow::PID(){
 
 int MainWindow::processThisRobot(TKobukiData robotdata)
 {
-    if(dataSave.init==true) // inicializujeme data
+    if(init==true)
     {
-//        loadMapp();
         inicialzation(robotdata);
     }
     locationPositon(robotdata);
-    calculatingDistance(robotdata);
+    calculatingVzdialenost(robotdata);
     if(datacounter%5)
     {
         ///tu zapisujeme tak aby sme to uvideli v GUI
-        emit uiValuesChanged(location.act_posX, location.act_posY, dataSave.encoder_Angle);
+        emit uiValuesChanged(act_posX, act_posY, encoder_Angle);
     }
     datacounter++;
 
 
  ///////////////zacinap pid//////////////////////
     PID();
-//    PID();
-//    return 0;
-//}
- //////////////koncim pid////////////////////////
- ///
- /// //////////zacinam4//////////////////////////
- ///
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
 
     return 0;
 }
@@ -601,9 +571,8 @@ int MainWindow::processThisLidar(LaserMeasurement laserData)
 
         int dist=copyOfLaserData.Data[k].scanDistance/100; ///vzdialenost nahodne predelena 20 aby to nejako vyzeralo v okne.. zmen podla uvazeni
         if((dist>=scanRange && dist<=30 && dist<=6.4) || (dist>=scanRange && dist<=30 && dist>=7)){
-            int xp=location.act_posX*10+(cos(((360.0-laserData.Data[k].scanAngle)*3.14159/180.0)+dataSave.encoder_Angle*3.14159/180.0))*dist; //prepocet do obrazovky
-            int yp=location.act_posY*10+(sin(((360.0-laserData.Data[k].scanAngle)*3.14159/180.0)+dataSave.encoder_Angle*3.14159/180.0))*dist;//prepocet do obrazovky
-            //printf("Suradnica x: %d a suradnica y: %d\n",xp,yp);
+            int xp=act_posX*10+(cos(((360.0-laserData.Data[k].scanAngle)*3.14159/180.0)+encoder_Angle*3.14159/180.0))*dist; //prepocet do obrazovky
+            int yp=act_posY*10+(sin(((360.0-laserData.Data[k].scanAngle)*3.14159/180.0)+encoder_Angle*3.14159/180.0))*dist;//prepocet do obrazovky
             xp += 20;
             yp += 20;
             p=1;
@@ -613,7 +582,6 @@ int MainWindow::processThisLidar(LaserMeasurement laserData)
         }
     }
     }
-    // 6,4 az po 7 nezapisovat a obmedzit vzdialenost na 3m, ked rotujem zak nezapuisovať
     updateLaserPicture=1;
     update();//tento prikaz prinuti prekreslit obrazovku.. zavola sa paintEvent funkcia
 
@@ -625,7 +593,7 @@ int MainWindow::processThisLidar(LaserMeasurement laserData)
 
 void MainWindow::on_pushButton_9_clicked() //start button
 {
-    dataSave.stop = false;
+    stop = false;
     forwardspeed=0;
     rotationspeed=0;
     //tu sa nastartuju vlakna ktore citaju data z lidaru a robota
@@ -657,35 +625,35 @@ void MainWindow::on_pushButton_10_clicked(){
 void MainWindow::on_pushButton_2_clicked() //forward
 {
     //pohyb dopredu
-    dataSave.stop = true;
+    stop = true;
     robot.setTranslationSpeed(500);
 
 }
 
 void MainWindow::on_pushButton_3_clicked() //back
 {
-    dataSave.stop = true;
+    stop = true;
     robot.setTranslationSpeed(-250);
 
 }
 
 void MainWindow::on_pushButton_6_clicked() //left
 {
-    dataSave.stop = true;
+    stop = true;
     robot.setRotationSpeed(3.14159/4);
 
 }
 
 void MainWindow::on_pushButton_5_clicked()//right
 {
-    dataSave.stop = true;
+    stop = true;
     robot.setRotationSpeed(-3.14159/4);
 
 }
 
 void MainWindow::on_pushButton_4_clicked() //stop
 {
-    dataSave.stop = false;
+    stop = false;
     robot.setTranslationSpeed(0);
 
 }
