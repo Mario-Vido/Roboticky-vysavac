@@ -1,4 +1,4 @@
-    #include "mainwindow.h"
+#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QPainter>
 #include <math.h>
@@ -454,19 +454,12 @@ void MainWindow::PID(){
         //okolie bodu kde sa chceme dostať, počítame obvod kruhu a následne vzdialenosť od stredu kruhu, ak vypočítana vzdialenosť od stredu je menšia ako vzdialenosť kružnice od kruhu tak zastavíme
         if(((pow(act_posX-koncovyX,2) + pow(act_posY-koncovyY,2))/100)  <pow(0.005,2)){ // rzchlost na yaklade vydialenosti k bodu
             robot.setTranslationSpeed(0);
-            //printf("ciel");
             speedingDown=0;
-            printf("pred podmienkou %d",gg);
-            printf("\ngg+1 x=%f y%f \n",endMatf[0][gg+1], endMatf[1][gg+1]);
             if(((fabs(endMatf[0][gg+1] +0.4) <= 0.01) )&&((fabs(endMatf[1][gg+1] +0.4) <= 0.01))){
             engineFire = false;
             robot.setTranslationSpeed(0);
-            printf("zbehol som");
-            cout<<("zbehol som")<<endl;
             }
             else{
-            printf("somv elsefit %d",gg);
-            cout<<("somv elsefit %d",gg)<<endl;
             gg++;
             koncovyX = endMatf[0][gg];
             koncovyY = endMatf[1][gg];
@@ -564,7 +557,7 @@ int MainWindow::processThisLidar(LaserMeasurement laserData)
     memcpy( &copyOfLaserData,&laserData,sizeof(LaserMeasurement));
     //tu mozete robit s datami z lidaru.. napriklad najst prekazky, zapisat do mapy. naplanovat ako sa prekazke vyhnut.
     // ale nic vypoctovo narocne - to iste vlakno ktore cita data z lidaru
-    if(robot.getTranslationSpeed()==0){
+    if(robot.getRotationSpeed()==0){
 
     for(int k=0;k<copyOfLaserData.numberOfScans;k++)
     {
